@@ -25,7 +25,7 @@ function App() {
 
   const Stack = createStackNavigator();
   return (
-    <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
+    <NavigationContainer fallback={<Text>Loading...</Text>}>
       <Stack.Navigator>
         <Stack.Screen name='Home' component={Home} options={{headerShown: false}}/>
       </Stack.Navigator>
