@@ -1,24 +1,25 @@
 {
   "files": {
     "main.css": "/spotify-playlist-analyzer/static/css/main.8c8b27cf.chunk.css",
-    "main.js": "/spotify-playlist-analyzer/static/js/main.a2fb64fc.chunk.js",
-    "main.js.map": "/spotify-playlist-analyzer/static/js/main.a2fb64fc.chunk.js.map",
-    "runtime-main.js": "/spotify-playlist-analyzer/static/js/runtime-main.8d608c74.js",
-    "runtime-main.js.map": "/spotify-playlist-analyzer/static/js/runtime-main.8d608c74.js.map",
-    "static/js/2.6d822bb6.chunk.js": "/spotify-playlist-analyzer/static/js/2.6d822bb6.chunk.js",
-    "static/js/2.6d822bb6.chunk.js.map": "/spotify-playlist-analyzer/static/js/2.6d822bb6.chunk.js.map",
-    "static/js/3.649c38cc.chunk.js": "/spotify-playlist-analyzer/static/js/3.649c38cc.chunk.js",
-    "static/js/3.649c38cc.chunk.js.map": "/spotify-playlist-analyzer/static/js/3.649c38cc.chunk.js.map",
+    "main.js": "/spotify-playlist-analyzer/static/js/main.139d8dbd.chunk.js",
+    "main.js.map": "/spotify-playlist-analyzer/static/js/main.139d8dbd.chunk.js.map",
+    "runtime-main.js": "/spotify-playlist-analyzer/static/js/runtime-main.a6012a09.js",
+    "runtime-main.js.map": "/spotify-playlist-analyzer/static/js/runtime-main.a6012a09.js.map",
+    "static/js/2.df07f7fd.chunk.js": "/spotify-playlist-analyzer/static/js/2.df07f7fd.chunk.js",
+    "static/js/2.df07f7fd.chunk.js.map": "/spotify-playlist-analyzer/static/js/2.df07f7fd.chunk.js.map",
+    "static/js/3.b02bd31f.chunk.js": "/spotify-playlist-analyzer/static/js/3.b02bd31f.chunk.js",
+    "static/js/3.b02bd31f.chunk.js.map": "/spotify-playlist-analyzer/static/js/3.b02bd31f.chunk.js.map",
     "index.html": "/spotify-playlist-analyzer/index.html",
     "static/css/main.8c8b27cf.chunk.css.map": "/spotify-playlist-analyzer/static/css/main.8c8b27cf.chunk.css.map",
-    "static/js/2.6d822bb6.chunk.js.LICENSE.txt": "/spotify-playlist-analyzer/static/js/2.6d822bb6.chunk.js.LICENSE.txt",
-    "static/media/in_your_head.94e10ed4.jpeg": "/spotify-playlist-analyzer/static/media/in_your_head.94e10ed4.jpeg",
-    "static/media/player-background.a828cfa8.jpg": "/spotify-playlist-analyzer/static/media/player-background.a828cfa8.jpg"
+    "static/js/2.df07f7fd.chunk.js.LICENSE.txt": "/spotify-playlist-analyzer/static/js/2.df07f7fd.chunk.js.LICENSE.txt",
+    "static/media/goback.10d456e3.png": "/spotify-playlist-analyzer/static/media/goback.10d456e3.png",
+    "static/media/player-background.a828cfa8.jpg": "/spotify-playlist-analyzer/static/media/player-background.a828cfa8.jpg",
+    "static/media/spotifylogo.6c526b82.png": "/spotify-playlist-analyzer/static/media/spotifylogo.6c526b82.png"
   },
   "entrypoints": [
-    "static/js/runtime-main.8d608c74.js",
-    "static/js/2.6d822bb6.chunk.js",
+    "static/js/runtime-main.a6012a09.js",
+    "static/js/2.df07f7fd.chunk.js",
     "static/css/main.8c8b27cf.chunk.css",
-    "static/js/main.a2fb64fc.chunk.js"
+    "static/js/main.139d8dbd.chunk.js"
   ]
 }
