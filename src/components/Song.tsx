@@ -3,6 +3,7 @@ import {Button, Image, StyleSheet, Dimensions, TextInput, TouchableOpacity, Text
 import axios from 'axios';
 import {PieChart} from 'react-minimal-pie-chart';
 import in_your_head from '../assets/images/in_your_head.jpeg';
+import AxiosGetTrackAnalysis from '../requests/AxiosGetTrackAnalysis';
 
 interface Props{
   navigation:any,
@@ -13,57 +14,56 @@ class Song extends React.Component<Props, any>{
   constructor(props: Props | Readonly<Props>) {
     super(props)
     this.state = {
-      // token: this.props.route.params.token,
+      token: this.props.route.params.token,
       /* Basic Song Info */
-      // id: this.props.route.params.songID,
-      // artwork: this.props.route.params.artwork,
-      artwork: in_your_head,
-      // name: this.props.route.params.name,
-      name: 'In Your Head',
-      // artists: this.props.route.params.artists,
-      artists: 'Rl Grime',
-      // album: this.props.route.params.album,
-      album: 'Single 2019',
+      id: this.props.route.params.songID,
+      artwork: this.props.route.params.artwork,
+      name: this.props.route.params.name,
+      artists: this.props.route.params.artists,
+      album: this.props.route.params.album,
       /* Slightly More Detail */
-      // duration: this.props.route.params.duration,
-      duration: '2:58',
-      // popularity: this.props.route.params.popularity,
-      popularity: '50',
-      // key: this.props.route.params.key,
-      key: 'B',
-      // bars: '', // Not included in route params
-      bars: '111', // Not included in route params
-      // mode: this.props.route.params.mode,
-      mode: 'Major',
-      // beats: '',  // Not included in route params
-      beats: '443',  // Not included in route params
-      // timeSig: this.props.route.params.timeSig,
-      timeSig: '4',
-      // sections: '', // Not included in route params
-      sections: '10', // Not included in route params
-      // bpm: this.props.route.params.bpm,
-      bpm: '150',
-      // segments: '', // Not included in route params
-      segments: '669', // Not included in route params
+      duration: this.props.route.params.duration,
+      popularity: this.props.route.params.popularity,
+      key: this.props.route.params.key,
+      bars: '', // Not included in route params
+      mode: this.props.route.params.mode,
+      beats: '',  // Not included in route params
+      timeSig: this.props.route.params.timeSig,
+      sections: '', // Not included in route params
+      bpm: this.props.route.params.bpm,
+      segments: '', // Not included in route params
       /* In Depth Detail */
-      // valence: this.props.route.params.valence,
-      // liveliness: this.props.route.params.liveliness,
-      // speechiness: this.props.route.params.speechiness,
-      // instrumentalness: this.props.route.params.instrumentalness,
-      // energy: this.props.route.params.energy,
-      // danceability: this.props.route.params.danceability,
-      // acousticness: this.props.route.params.acousticness,
-      valence: .10,
-      liveliness: .20,
-      speechiness: .30,
-      instrumentalness: .40,
-      energy: .50,
-      danceability: .60,
-      acousticness: .70,
+      valence: this.props.route.params.valence,
+      liveliness: this.props.route.params.liveliness,
+      speechiness: this.props.route.params.speechiness,
+      instrumentalness: this.props.route.params.instrumentalness,
+      energy: this.props.route.params.energy,
+      danceability: this.props.route.params.danceability,
+      acousticness: this.props.route.params.acousticness,
     };
   }
 
+  componentDidMount() {
+    this.renderValues();
+  }
 
+  renderValues = async() =>{
+    this.setState({
+      token: this.props.route.params.token,
+      id: this.props.route.params.songID,
+    });
+    try{
+      let trackAnalysis = await AxiosGetTrackAnalysis.GetTrackAnalysis(this.state.id, this.state.token);
+      this.setState({
+        bars: trackAnalysis.bars.length,
+        beats: trackAnalysis.beats.length,
+        sections: trackAnalysis.sections.length,
+        segments: trackAnalysis.segments.length,
+      })
+    }catch (err) {
+      console.log(err);
+    }
+  }
 
   render() {return (
     <ImageBackground source = {{uri:this.state.artwork}} style = {styles.backgroundimage} blurRadius= {200}>
@@ -232,6 +232,8 @@ const styles = StyleSheet.create({
   songTitle:{
     color: 'white',
     fontFamily:'Segoe UI',
+    textShadowColor:'black',
+    textShadowRadius:4,
     letterSpacing:1,
     fontSize: 25,
     fontWeight: '700',
@@ -241,6 +243,8 @@ const styles = StyleSheet.create({
   songArtist:{
     color: 'white',
     fontFamily:'Segoe UI',
+    textShadowColor:'black',
+    textShadowRadius:4,
     letterSpacing:1,
     fontSize: 20,
     fontWeight: '500',
@@ -250,6 +254,8 @@ const styles = StyleSheet.create({
   songTypeYear:{
     color: 'white',
     fontFamily:'Segoe UI',
+    textShadowColor:'black',
+    textShadowRadius:4,
     letterSpacing:1,
     fontSize: 15,
     textAlign: 'left',
@@ -267,6 +273,8 @@ const styles = StyleSheet.create({
   statTextLeft:{
     color: 'white',
     fontFamily:'Segoe UI',
+    textShadowColor:'black',
+    textShadowRadius:4,
     letterSpacing:1,
     fontSize: 20,
     fontWeight: '700',
@@ -274,6 +282,8 @@ const styles = StyleSheet.create({
   statTextRight:{
     color: 'white',
     fontFamily:'Segoe UI',
+    textShadowColor:'black',
+    textShadowRadius:4,
     letterSpacing:1,
     fontSize: 20,
     fontWeight: '700',
@@ -282,12 +292,16 @@ const styles = StyleSheet.create({
   statDescText:{
     color: 'white',
     fontFamily: 'Segoe UI',
+    textShadowColor:'black',
+    textShadowRadius:4,
     letterSpacing:1,
     fontSize: 15,
   },
   statDescTextRight:{
     color: 'white',
     fontFamily: 'Segoe UI',
+    textShadowColor:'black',
+    textShadowRadius:4,
     letterSpacing:1,
     fontSize: 15,
     textAlign: 'right',
@@ -295,6 +309,8 @@ const styles = StyleSheet.create({
   graphValues:{
     color: 'white',
     fontFamily: 'Segoe UI',
+    textShadowColor:'black',
+    textShadowRadius:4,
     letterSpacing:1,
     fontSize: 12,
     textAlign: 'left'
@@ -351,6 +367,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     fontFamily: 'Segoe UI',
+    textShadowColor:'black',
+    textShadowRadius:4,
     letterSpacing:1,
     textAlign: 'center',
     // alignSelf: 'center'

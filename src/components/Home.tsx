@@ -16,6 +16,7 @@ class Home extends React.Component<Props, any>{
     super(props)
     this.state = {
       infoType:'data',
+      uri: '0fCpH2h614ebCnRW4Wmy9L',  // spotify:playlist:1WTlGjbYHCwrQpPZyXqTmc
     };
   }
   
@@ -24,10 +25,11 @@ class Home extends React.Component<Props, any>{
       return(
         <View style={styles.rightSide}>
           <Text style={styles.rightHeaderText}>SORT BY</Text>
-          <Text style={styles.rightDataText}>    KEY    </Text>
-          <Text style={styles.rightDataText}>CAMELOT</Text>
-          <Text style={styles.rightDataText}>   ENERGY   </Text>
-          <Text style={styles.rightDataText}>    BPM    </Text>
+          <Text style={styles.rightDataText}>BPM</Text>
+          <Text style={styles.rightDataText}>KEY</Text>
+          <Text style={styles.rightDataText}>ENERGY</Text>
+          <Text style={styles.rightDataText}>NAME</Text>
+          <Text style={styles.rightDataText}>ARTISTS</Text>
         </View>
       );
     }
@@ -90,31 +92,31 @@ class Home extends React.Component<Props, any>{
             <Text style={styles.rightHeaderText}>ANALYZE</Text>
           <View style={{flexDirection:'row', justifyContent:'center'}}>
             <View style={{borderRadius:100, borderColor:'white', borderWidth:1, opacity:.5, backgroundColor:'#9C1EFF', height:'7vh',width:'7vh'}}/>
-            <Text style={styles.rightAnalysisText}>valence</Text>
-          </View>
-          <View style={{flexDirection:'row', justifyContent:'center'}}>
-            <View style={{borderRadius:100, borderColor:'white', borderWidth:1, opacity:.5, backgroundColor:'#3E3BD6', height:'7vh',width:'7vh'}}/>
-            <Text style={styles.rightAnalysisText}>speechiness</Text>
-          </View>
-          <View style={{flexDirection:'row', justifyContent:'center'}}>
-            <View style={{borderRadius:100, borderColor:'white', borderWidth:1, opacity:.5, backgroundColor:'#7280FF', height:'7vh',width:'7vh'}}/>
-            <Text style={styles.rightAnalysisText}>liveness</Text>
-          </View>
-          <View style={{flexDirection:'row', justifyContent:'center'}}>
-            <View style={{borderRadius:100, borderColor:'white', borderWidth:1, opacity:.5, backgroundColor:'#5BCC96', height:'7vh',width:'7vh'}}/>
-            <Text style={styles.rightAnalysisText}>instrumentalness</Text>
-          </View>
-          <View style={{flexDirection:'row', justifyContent:'center'}}>
-            <View style={{borderRadius:100, borderColor:'white', borderWidth:1, opacity:.5, backgroundColor:'#FFE70F', height:'7vh',width:'7vh'}}/>
             <Text style={styles.rightAnalysisText}>energy</Text>
           </View>
           <View style={{flexDirection:'row', justifyContent:'center'}}>
-            <View style={{borderRadius:100, borderColor:'white', borderWidth:1, opacity:.5, backgroundColor:'#FF7A00', height:'7vh',width:'7vh'}}/>
+            <View style={{borderRadius:100, borderColor:'white', borderWidth:1, opacity:.5, backgroundColor:'#3E3BD6', height:'7vh',width:'7vh'}}/>
+            <Text style={styles.rightAnalysisText}>valence</Text>
+          </View>
+          <View style={{flexDirection:'row', justifyContent:'center'}}>
+            <View style={{borderRadius:100, borderColor:'white', borderWidth:1, opacity:.5, backgroundColor:'#7280FF', height:'7vh',width:'7vh'}}/>
             <Text style={styles.rightAnalysisText}>danceability</Text>
           </View>
           <View style={{flexDirection:'row', justifyContent:'center'}}>
-            <View style={{borderRadius:100, borderColor:'white', borderWidth:1, opacity:.5, backgroundColor:'#FF0000', height:'7vh',width:'7vh'}}/>
+            <View style={{borderRadius:100, borderColor:'white', borderWidth:1, opacity:.5, backgroundColor:'#5BCC96', height:'7vh',width:'7vh'}}/>
             <Text style={styles.rightAnalysisText}>acousticness</Text>
+          </View>
+          <View style={{flexDirection:'row', justifyContent:'center'}}>
+            <View style={{borderRadius:100, borderColor:'white', borderWidth:1, opacity:.5, backgroundColor:'#FFE70F', height:'7vh',width:'7vh'}}/>
+            <Text style={styles.rightAnalysisText}>instrumentalness</Text>
+          </View>
+          <View style={{flexDirection:'row', justifyContent:'center'}}>
+            <View style={{borderRadius:100, borderColor:'white', borderWidth:1, opacity:.5, backgroundColor:'#FF7A00', height:'7vh',width:'7vh'}}/>
+            <Text style={styles.rightAnalysisText}>speechiness</Text>
+          </View>
+          <View style={{flexDirection:'row', justifyContent:'center'}}>
+            <View style={{borderRadius:100, borderColor:'white', borderWidth:1, opacity:.5, backgroundColor:'#FF0000', height:'7vh',width:'7vh'}}/>
+            <Text style={styles.rightAnalysisText}>liveliness</Text>
           </View>
         </View>
       );
@@ -134,9 +136,10 @@ class Home extends React.Component<Props, any>{
             <View style={styles.grayBar}/>
             <TextInput
               style={styles.inputUri}
-              placeholder={'Enter a Spotify Playlist URI'}
+              placeholder={"Paste Spotify Playlist URI (ex: 0fCpH2h614ebCnRW4Wmy9L)"}
               allowFontScaling={true}
-              placeholderTextColor='#5F5454'/>
+              placeholderTextColor='#5F5454'
+              onChangeText={inputUri=>{this.setState({uri:inputUri})}}/>
             <View style={styles.grayBar}/>
             </ImageBackground>
           <Text style={styles.analysisText}>SPOTIFY PLAYLIST ANALYSIS</Text>
@@ -144,7 +147,7 @@ class Home extends React.Component<Props, any>{
           <Image source = {{uri:trackbar}} style={{alignSelf:'center', width:'100%', paddingVertical:'10%', resizeMode:'contain'}}/>
           <View style={{flexDirection:'row', justifyContent:'space-between', paddingVertical:'7%'}}>
             <Image source = {{uri:backButton}} style={{alignSelf:'center', width:'20%', paddingVertical:'7%', resizeMode:'contain'}}/>
-            <TouchableOpacity onPress={()=>this.props.navigation.navigate('Playlist')} style={{height:'10vh', width:'5vw'}}>
+            <TouchableOpacity onPress={()=>this.props.navigation.navigate('Playlist', {playlistUri:this.state.uri})} style={{height:'10vh', width:'5vw'}}>
               <Image source = {{uri:playButton}} style={{alignSelf:'center', width:'100%', height:'100%', resizeMode:'contain'}}/>
             </TouchableOpacity>
             <Image source = {{uri:skipButton}} style={{alignSelf:'center', width:'20%', paddingVertical:'7%', resizeMode:'contain'}}/>
