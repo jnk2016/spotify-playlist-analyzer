@@ -4,6 +4,9 @@ import { View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import Home from './components/Home';
+import Playlist from './components/Playlist';
+import Song from './components/Song';
+import backButton from './assets/images/backButton.jpg';
 
 function App() {
   const config = {
@@ -26,7 +29,9 @@ function App() {
   const Stack = createStackNavigator();
   return (
     <NavigationContainer fallback={<Text>Loading...</Text>}>
-      <Stack.Navigator>
+      <Stack.Navigator initialRouteName={'Home'}>
+        <Stack.Screen name='Song' component={Song} options={{headerShown: true, headerBackTitle:'Back',}}/>
+        <Stack.Screen name='Playlist' component={Playlist} options={{headerShown: true}}/>
         <Stack.Screen name='Home' component={Home} options={{headerShown: false}}/>
       </Stack.Navigator>
     </NavigationContainer>
