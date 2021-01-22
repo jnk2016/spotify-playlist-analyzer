@@ -50,6 +50,8 @@ class PlaylistItems extends React.Component<Props, any>{
       trackIdStr:'',
       TrackSimple:[],
       TrackFeatures:[],
+      // New URL to playlist
+      playlistUrl: 'spotify.com',
     };
   }
 
@@ -99,9 +101,13 @@ class PlaylistItems extends React.Component<Props, any>{
             duration: dur,
             id: track.track.id,
             popularity: track.track.popularity,
+            externalUrl: track.track.external_urls.spotify,
           });
-        })
+        }),
+        TrackAmount: playlist.tracks.total,
+        playlistUrl: playlist.external_urls.spotify,
       })
+      // console.log(this.state.TrackAmount)
       this.setState({
         trackIdStr: this.state.trackIds.join(',')
       })
@@ -149,6 +155,104 @@ class PlaylistItems extends React.Component<Props, any>{
           });
         })
       })
+      //start of even newer stuff
+      let iterations = Math.floor(this.state.TrackAmount/100);
+      console.log(iterations)
+      for(var i = 0; i<iterations; i++){
+        /* Get all the tracks from the playlist */
+        let newPlaylist = await axios({
+        method: 'get',
+        url:`https://api.spotify.com/v1/playlists/${this.state.playlistUri}/tracks`,
+        headers: {
+          Authorization: `Bearer ${this.state.AuthToken}`
+        },
+        params:{
+          offset: 100*(1+i)
+        },
+        })
+        .then(response=>{
+            console.log(response.data);
+            
+            return response.data;
+        })
+        .catch(err =>{
+            console.log(err, err.response);
+            return err.response;
+        });
+        // New Stuff
+        this.setState({
+          trackIds: newPlaylist.items.map((track:any)=>{
+            return(track.track.id);
+          }),
+          TrackSimple: this.state.TrackSimple.concat(newPlaylist.items.map((track:any)=>{
+            let minutes = Math.floor(track.track.duration_ms/60000);
+            let seconds = Math.round((track.track.duration_ms - (60000*minutes))/1000);
+            let dur = `${minutes}:${seconds}`;
+            let artUrl = '';
+            // if(track.track.images[1].url == undefined){ artUrl = "https://community.spotify.com/t5/image/serverpage/image-id/25294i2836BD1C1A31BDF2?v=1.0"}
+            // else{artUrl = track.track.images[1].url;}
+            if(seconds<10){dur = `${minutes}:0${seconds}`;}
+            return({
+              artwork: track.track.album.images[1].url,
+              name: track.track.name,
+              artists: track.track.artists[0].name,
+              album: track.track.album.name,
+              duration: dur,
+              id: track.track.id,
+              popularity: track.track.popularity,
+              externalUrl: track.track.external_urls.spotify,
+            });
+          }))
+        })
+        this.setState({
+          trackIdStr: this.state.trackIds.join(',')
+        })
+        // console.log(this.state.trackIds);
+        
+        let newFeatures = await axios({
+          method: 'get',
+          url:`https://api.spotify.com/v1/audio-features`,
+          headers: {
+            Authorization: `Bearer ${this.state.AuthToken}`
+          },
+          params:{
+            ids:`${this.state.trackIdStr}`
+          }
+          })
+          .then(response=>{
+              console.log(response.data);
+              return response.data;
+          })
+          .catch(err =>{
+              console.log(err, err.response);
+              return err.response;
+          });
+        /* features.audio_features */
+        this.setState({
+          TrackFeatures: this.state.TrackFeatures.concat(newFeatures.audio_features.map((songFeatures:any)=>{
+            let keyString = determineKey(songFeatures.key);
+            let modality = 'Major';
+            if(songFeatures.mode == 0){modality = 'Minor';}
+            return({
+              id: songFeatures.id,
+              bpm: Math.round(songFeatures.tempo),
+              keyNum: songFeatures.key,
+              key: keyString,
+              energy: songFeatures.energy,
+              timeSig: songFeatures.time_signature,
+              mode: modality,
+              // even more features
+              valence: songFeatures.valence,
+              liveliness: songFeatures.liveliness,
+              speechiness: songFeatures.speechiness,
+              instrumentalness: songFeatures.instrumentalness,
+              danceability: songFeatures.danceability,
+              acousticness: songFeatures.acousticness,
+            });
+          }))
+        })
+      }
+
       // console.log(this.state.TrackFeatures)
       /* combining features with simple */
       let merged = [];
@@ -193,6 +297,7 @@ class PlaylistItems extends React.Component<Props, any>{
                 energy: song.energy,
                 danceability: song.danceability,
                 acousticness: song.acousticness,
+                externalUrl: song.externalUrl,
               })
             }} key={i}>
             <View style={styles.songLeft}>
@@ -273,6 +378,7 @@ class PlaylistItems extends React.Component<Props, any>{
               energy: song.energy,
               danceability: song.danceability,
               acousticness: song.acousticness,
+              externalUrl: song.externalUrl,
             })
           }} key={i}>
           <View style={styles.songLeft}>
@@ -321,7 +427,7 @@ class PlaylistItems extends React.Component<Props, any>{
       TrackDetails: this.state.TrackDetails.filter((track: { artists: any; })=> (track.artists==params.artists))
     })}
     this.setState({
-      BasicInfo: this.state.TrackDetails.map((song: { id: any; artwork: any; name: any; artists: any; album: any; duration: any; key: any; timeSig: any; bpm: any; popularity: any; mode: any; valence: any; liveliness: any; speechiness: any; instrumentalness: any; energy: number; danceability: any; acousticness: any; },i: any) => {
+      BasicInfo: this.state.TrackDetails.map((song: { externalUrl:any,id: any; artwork: any; name: any; artists: any; album: any; duration: any; key: any; timeSig: any; bpm: any; popularity: any; mode: any; valence: any; liveliness: any; speechiness: any; instrumentalness: any; energy: number; danceability: any; acousticness: any; },i: any) => {
         return(
         <TouchableOpacity style={styles.songList} onPress={()=>{
             this.props.navigation.navigate('Song', {
@@ -345,6 +451,7 @@ class PlaylistItems extends React.Component<Props, any>{
               energy: song.energy,
               danceability: song.danceability,
               acousticness: song.acousticness,
+              externalUrl: song.externalUrl,
             })
           }} key={i}>
           <View style={styles.songLeft}>
@@ -561,7 +668,7 @@ class PlaylistItems extends React.Component<Props, any>{
               <Text style={styles.trackAmount}>{this.state.TrackAmount} Tracks</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.spotifyButton}>
+          <TouchableOpacity style={styles.spotifyButton} onPress={()=>{window.open(this.state.playlistUrl, '_blank')}}>
             <Text style={styles.buttonText}>PLAY ON SPOTIFY</Text>
           </TouchableOpacity>
         </View>
@@ -917,8 +1024,8 @@ const styles = StyleSheet.create({
     // justifyContent: 'space-between',
   },
   playArtContainer:{
-    width:200,
-    height:200,
+    width:'30vh',
+    height:'30vh',
     // paddingVertical: '5%',
     justifyContent: 'center',
     alignItems: 'center',

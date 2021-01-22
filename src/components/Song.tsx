@@ -40,6 +40,7 @@ class Song extends React.Component<Props, any>{
       energy: this.props.route.params.energy,
       danceability: this.props.route.params.danceability,
       acousticness: this.props.route.params.acousticness,
+      externalUrl: this.props.route.params.externalUrl,
     };
   }
 
@@ -67,8 +68,7 @@ class Song extends React.Component<Props, any>{
 
   render() {return (
     <ImageBackground source = {{uri:this.state.artwork}} style = {styles.backgroundimage} blurRadius= {200}>
-      {/* <ScrollView> */}
-        <TouchableOpacity style={styles.spotifyButton}>
+        <TouchableOpacity style={styles.spotifyButton} onPress={()=>{window.open(this.state.externalUrl,'_blank')}}>
           <Text style={styles.buttonText}>PLAY ON SPOTIFY</Text>
         </TouchableOpacity>
         <View style={{justifyContent: 'center'}}>
@@ -223,7 +223,6 @@ class Song extends React.Component<Props, any>{
           <Text style={styles.songArtist}>{this.state.artists}</Text>
           <Text style={styles.songTypeYear}>{this.state.album}</Text>
         </View>
-      {/* </ScrollView> */}
     </ImageBackground>
   );}
 }
@@ -357,20 +356,22 @@ const styles = StyleSheet.create({
     // alignSelf:'center',
     // alignContent: 'center',
     width: 150,
+    height:'5vh',
     alignSelf: 'flex-end',
-    marginTop: '2%',
+    // marginTop: '2%',
     marginRight: '2%',
-    marginBottom: '-3%',
+    marginBottom: '-1%',
+    textAlign: 'center',
+    textAlignVertical:'center',
   },
   buttonText:{
     color:'white',
     fontSize: 12,
     fontWeight: '600',
     fontFamily: 'Segoe UI',
-    textShadowColor:'black',
-    textShadowRadius:4,
     letterSpacing:1,
     textAlign: 'center',
+    textAlignVertical:'center',
     // alignSelf: 'center'
   },
 })

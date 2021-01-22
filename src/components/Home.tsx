@@ -136,13 +136,17 @@ class Home extends React.Component<Props, any>{
             <View style={styles.grayBar}/>
             <TextInput
               style={styles.inputUri}
-              placeholder={"Paste Spotify Playlist URI (ex: 0fCpH2h614ebCnRW4Wmy9L)"}
+              placeholder={"Copy and Paste Playlist Link of Public Spotify Playlist"}
               allowFontScaling={true}
               placeholderTextColor='#5F5454'
-              onChangeText={inputUri=>{this.setState({uri:inputUri})}}/>
+              onChangeText={inputUri=>{
+                inputUri = inputUri.replace('https://open.spotify.com/playlist/', '');
+                inputUri = inputUri.slice(0,22);
+                this.setState({uri:inputUri});
+                }}/>
             <View style={styles.grayBar}/>
             </ImageBackground>
-          <Text style={styles.analysisText}>SPOTIFY PLAYLIST ANALYSIS</Text>
+          <Text style={styles.analysisText}>SPOTIFY PUBLIC PLAYLIST ANALYZER</Text>
           <Text style={styles.sortText}>CLICK THE PLAY BUTTON TO ANALYZE</Text>
           <Image source = {{uri:trackbar}} style={{alignSelf:'center', width:'100%', paddingVertical:'10%', resizeMode:'contain'}}/>
           <View style={{flexDirection:'row', justifyContent:'space-between', paddingVertical:'7%'}}>
