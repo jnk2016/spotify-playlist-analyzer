@@ -50,6 +50,8 @@ class PlaylistItems extends React.Component<Props, any>{
       TrackFeatures:[],
       // New URL to playlist
       playlistUrl: 'spotify.com',
+      // Error Popup
+      errorStatus:false,
     };
   }
 
@@ -76,6 +78,9 @@ class PlaylistItems extends React.Component<Props, any>{
           return response.data;
       })
       .catch(err =>{
+          this.setState({
+            errorStatus:true,
+          })
           return err.response;
       });
       // New Stuff
@@ -619,9 +624,27 @@ class PlaylistItems extends React.Component<Props, any>{
     }
   }
 
+  renderErrorMessage=()=>{
+    if(this.state.errorStatus == false){
+      return(<View/>)
+    }
+    else if(this.state.errorStatus==true){
+      return(
+        <View style={{height:'20vh', width:'30vw', justifyContent:'space-between', flexDirection:'column', backgroundColor:'white', borderRadius:20, padding:'1%', position:'absolute',zIndex:10, alignSelf:'center', marginTop:'8%', shadowColor:'black',shadowRadius:10}}>
+          <Text style={{fontSize:16, fontFamily:'Segoe UI', color:'black', fontWeight:'700', letterSpacing:1}}>ERROR RETRIEVING PLAYLIST</Text>
+          <Text style={{fontSize:12, fontFamily:'Segoe UI', color:'black', fontWeight:'500', letterSpacing:1, flex:1, flexDirection:'row', paddingVertical:'2%'}}>Please make sure to 'Copy Playlist Link' and that it links to a valid, public Spotify playlist containing only songs found on Spotify.</Text>
+            <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#1DB954', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius:50, shadowColor:'black',shadowRadius:5, shadowOffset:{width:1,height:1}}} onPress={()=>{this.props.navigation.navigate('Spotify Public Playlist Analyzer')}}>
+              <Text style={{color:'white', alignSelf:'center', fontFamily:'Segoe UI', letterSpacing:1, fontWeight:'600'}}>GO BACK</Text>
+            </TouchableOpacity>
+        </View>
+      )
+    }
+  }
+
   render(){return (
     <LinearGradient  colors = {['#353535', '#494949','#252525']} style={{minHeight:'100vh'}}>
       <ScrollView style = {{paddingBottom:'3%'}}>
+        {this.renderErrorMessage()}
         <View style={styles.headerContainer}>
           <View style={styles.playlistContainer}>
             <View style={styles.playArtContainer}>
