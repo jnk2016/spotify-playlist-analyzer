@@ -1,16 +1,14 @@
 import React, {Component, useState} from 'react';
-import {Button, Image, StyleSheet, Dimensions, TextInput, TouchableOpacity, Text, View, Alert, ScrollView, ImageBackground} from 'react-native';
+import {Button, Image, StyleSheet, TextInput, TouchableOpacity, Text, View, ScrollView } from 'react-native';
 import axios from 'axios';
 import AxiosGetPlaylist from '../requests/AxiosGetPlaylist';
 import AxiosGetToken from '../requests/AxiosGetToken';
+import LinearGradient from '../assets/Features/LinearGradient';
 
 interface Props{
   navigation:any,
   route: any,
 }
-
-//DP: 1HhAiDpmQdi5ryyFjzjlyD, JK(Test): 4y7pEAyFZCDl2fW8SHrEKJ  7am: 0fCpH2h614ebCnRW4Wmy9L yumi:1cum7ExwRDhcWJi8BoNxWC
-// const playlistUriCode = '1cum7ExwRDhcWJi8BoNxWC';
 
 function determineKey(key: any){
   if(key == 0)      {return 'C'}
@@ -35,7 +33,7 @@ class PlaylistItems extends React.Component<Props, any>{
       Name: '',
       ImageUrl: '',
       Owner: '',
-      Descrip: '',
+      Descrip: "",
       TrackAmount: '',
       TrackDetails: [],
       AuthToken: '',
@@ -75,12 +73,9 @@ class PlaylistItems extends React.Component<Props, any>{
       },
       })
       .then(response=>{
-          console.log(response.data);
-          
           return response.data;
       })
       .catch(err =>{
-          console.log(err, err.response);
           return err.response;
       });
       // New Stuff
@@ -93,10 +88,13 @@ class PlaylistItems extends React.Component<Props, any>{
           let seconds = Math.round((track.track.duration_ms - (60000*minutes))/1000);
           let dur = `${minutes}:${seconds}`;
           if(seconds<10){dur = `${minutes}:0${seconds}`;}
+          let allArtists = track.track.artists.map((artist:any)=>{return artist.name});
+          allArtists=allArtists.join(', ');
           return({
             artwork: track.track.album.images[1].url,
             name: track.track.name,
-            artists: track.track.artists[0].name,
+            // artists: track.track.artists[0].name,
+            artists: allArtists,
             album: track.track.album.name,
             duration: dur,
             id: track.track.id,
@@ -107,11 +105,9 @@ class PlaylistItems extends React.Component<Props, any>{
         TrackAmount: playlist.tracks.total,
         playlistUrl: playlist.external_urls.spotify,
       })
-      // console.log(this.state.TrackAmount)
       this.setState({
         trackIdStr: this.state.trackIds.join(',')
       })
-      // console.log(this.state.trackIds);
       
       let features = await axios({
         method: 'get',
@@ -124,11 +120,9 @@ class PlaylistItems extends React.Component<Props, any>{
         }
         })
         .then(response=>{
-            console.log(response.data);
             return response.data;
         })
         .catch(err =>{
-            console.log(err, err.response);
             return err.response;
         });
       /* features.audio_features */
@@ -147,7 +141,7 @@ class PlaylistItems extends React.Component<Props, any>{
             mode: modality,
             // even more features
             valence: songFeatures.valence,
-            liveliness: songFeatures.liveliness,
+            liveness: songFeatures.liveness,
             speechiness: songFeatures.speechiness,
             instrumentalness: songFeatures.instrumentalness,
             danceability: songFeatures.danceability,
@@ -157,7 +151,6 @@ class PlaylistItems extends React.Component<Props, any>{
       })
       //start of even newer stuff
       let iterations = Math.floor(this.state.TrackAmount/100);
-      console.log(iterations)
       for(var i = 0; i<iterations; i++){
         /* Get all the tracks from the playlist */
         let newPlaylist = await axios({
@@ -171,12 +164,9 @@ class PlaylistItems extends React.Component<Props, any>{
         },
         })
         .then(response=>{
-            console.log(response.data);
-            
             return response.data;
         })
         .catch(err =>{
-            console.log(err, err.response);
             return err.response;
         });
         // New Stuff
@@ -189,8 +179,6 @@ class PlaylistItems extends React.Component<Props, any>{
             let seconds = Math.round((track.track.duration_ms - (60000*minutes))/1000);
             let dur = `${minutes}:${seconds}`;
             let artUrl = '';
-            // if(track.track.images[1].url == undefined){ artUrl = "https://community.spotify.com/t5/image/serverpage/image-id/25294i2836BD1C1A31BDF2?v=1.0"}
-            // else{artUrl = track.track.images[1].url;}
             if(seconds<10){dur = `${minutes}:0${seconds}`;}
             return({
               artwork: track.track.album.images[1].url,
@@ -207,7 +195,6 @@ class PlaylistItems extends React.Component<Props, any>{
         this.setState({
           trackIdStr: this.state.trackIds.join(',')
         })
-        // console.log(this.state.trackIds);
         
         let newFeatures = await axios({
           method: 'get',
@@ -220,11 +207,9 @@ class PlaylistItems extends React.Component<Props, any>{
           }
           })
           .then(response=>{
-              console.log(response.data);
               return response.data;
           })
           .catch(err =>{
-              console.log(err, err.response);
               return err.response;
           });
         /* features.audio_features */
@@ -243,7 +228,7 @@ class PlaylistItems extends React.Component<Props, any>{
               mode: modality,
               // even more features
               valence: songFeatures.valence,
-              liveliness: songFeatures.liveliness,
+              liveness: songFeatures.liveness,
               speechiness: songFeatures.speechiness,
               instrumentalness: songFeatures.instrumentalness,
               danceability: songFeatures.danceability,
@@ -252,8 +237,6 @@ class PlaylistItems extends React.Component<Props, any>{
           }))
         })
       }
-
-      // console.log(this.state.TrackFeatures)
       /* combining features with simple */
       let merged = [];
       for(let i=0; i< this.state.TrackSimple.length; i++){
@@ -270,13 +253,13 @@ class PlaylistItems extends React.Component<Props, any>{
         Name: playlist.name,
         ImageUrl: playlist.images[0].url,
         Owner: playlist.owner.display_name,
-        Descrip: playlist.description,
+        Descrip: playlist.description.replace(/&#x27;|&quot;/gi, "'"),
         TrackAmount: playlist.tracks.total,
 
         BasicInfo: this.state.TrackDetails.map((song:any, i:any) => {
           return(
           <TouchableOpacity style={styles.songList} onPress={()=>{
-              this.props.navigation.navigate('Song', {
+              this.props.navigation.navigate('Song Analysis', {
                 token: this.state.AuthToken,
                 songID:song.id,
                 artwork: song.artwork,
@@ -291,7 +274,7 @@ class PlaylistItems extends React.Component<Props, any>{
                 mode: song.mode,
                 // in depth audio features
                 valence: song.valence,
-                liveliness: song.liveliness,
+                liveness: song.liveness,
                 speechiness: song.speechiness,
                 instrumentalness: song.instrumentalness,
                 energy: song.energy,
@@ -309,15 +292,11 @@ class PlaylistItems extends React.Component<Props, any>{
               <Text style={styles.songTextAlbum}>{song.album}</Text>
             </View>
             <View style={styles.songRight}>
-              {/* <View style={styles.rightLeft}> */}
                 <Text style={styles.songText}>{song.duration}</Text>
                 <Text style={styles.songText}>{song.key}</Text>
                 <Text style={styles.songText}>{Math.round(song.energy * 10)}</Text>
-              {/* </View> */}
-              {/* <View style={styles.rightRight}> */}
                 <Text style={styles.songText}>{song.bpm}</Text>
                 <Text style={styles.songText}>{song.timeSig}</Text>
-              {/* </View> */}
             </View>
           </TouchableOpacity>
         )})
@@ -357,7 +336,7 @@ class PlaylistItems extends React.Component<Props, any>{
       BasicInfo: this.state.TrackDetails.map((song:any,i:any) => {
         return(
         <TouchableOpacity style={styles.songList} onPress={()=>{
-            this.props.navigation.navigate('Song', {
+            this.props.navigation.navigate('Song Analysis', {
               token: this.state.AuthToken,
               songID:song.id,
               artwork: song.artwork,
@@ -372,7 +351,7 @@ class PlaylistItems extends React.Component<Props, any>{
               mode: song.mode,
               // in depth audio features
               valence: song.valence,
-              liveliness: song.liveliness,
+              liveness: song.liveness,
               speechiness: song.speechiness,
               instrumentalness: song.instrumentalness,
               energy: song.energy,
@@ -390,47 +369,42 @@ class PlaylistItems extends React.Component<Props, any>{
             <Text style={styles.songTextAlbum}>{song.album}</Text>
           </View>
           <View style={styles.songRight}>
-            {/* <View style={styles.rightLeft}> */}
               <Text style={styles.songText}>{song.duration}</Text>
               <Text style={styles.songText}>{song.key}</Text>
               <Text style={styles.songText}>{Math.round(song.energy * 10)}</Text>
-            {/* </View> */}
-            {/* <View style={styles.rightRight}> */}
               <Text style={styles.songText}>{song.bpm}</Text>
               <Text style={styles.songText}>{song.timeSig}</Text>
-            {/* </View> */}
           </View>
         </TouchableOpacity>
       )})
     })
   }
 
-  filterPlaylist = (filterMethod:any, params:any) => {
+  filterPlaylist = async (filterMethod:any, params:any) => {
+    let newArray = [];
     if(filterMethod == 'key'){
-    this.setState({
-      TrackDetails: this.state.TrackDetails.filter((track: { keyNum: any; })=> (track.keyNum==params))
-    })}
+        newArray =  this.state.TrackDetails.filter((track: { keyNum: any; })=> (track.keyNum==params))
+    }
     else if(filterMethod == 'energy'){
-    this.setState({
-      TrackDetails: this.state.TrackDetails.filter((track: { energy: number; })=> ((Math.round(track.energy * 10) >= params.minEnergy) && Math.round(track.energy * 10) <= params.maxEnergy))
-    })}
+        newArray =  this.state.TrackDetails.filter((track: { energy: any; })=> ((Math.round(track.energy * 10) >= params.minEnergy) && Math.round(track.energy * 10) <= params.maxEnergy))
+    }
     else if(filterMethod == 'time sig.'){
-    this.setState({
-      TrackDetails: this.state.TrackDetails.filter((track: { timeSig: any; })=> (track.timeSig==params))
-    })}
+        newArray = this.state.TrackDetails.filter((track: { timeSig: any; })=> (track.timeSig==params))
+    }
     else if(filterMethod == 'bpm'){
-    this.setState({
-      TrackDetails: this.state.TrackDetails.filter((track: { bpm: number; })=> (track.bpm >= params.minBpm && track.bpm <= params.maxBpm))
-    })}
+        newArray =  this.state.TrackDetails.filter((track: { bpm: any; })=> (track.bpm >= params.minBpm && track.bpm <= params.maxBpm))
+    }
     else if(filterMethod == 'artists'){
+        newArray =  this.state.TrackDetails.filter((track: { artists: any; })=> (track.artists==params.artists))
+    }
     this.setState({
-      TrackDetails: this.state.TrackDetails.filter((track: { artists: any; })=> (track.artists==params.artists))
-    })}
+      TrackDetails:await newArray
+    })
     this.setState({
-      BasicInfo: this.state.TrackDetails.map((song: { externalUrl:any,id: any; artwork: any; name: any; artists: any; album: any; duration: any; key: any; timeSig: any; bpm: any; popularity: any; mode: any; valence: any; liveliness: any; speechiness: any; instrumentalness: any; energy: number; danceability: any; acousticness: any; },i: any) => {
+      BasicInfo: this.state.TrackDetails.map((song: any,i: any) => {
         return(
         <TouchableOpacity style={styles.songList} onPress={()=>{
-            this.props.navigation.navigate('Song', {
+            this.props.navigation.navigate('Song Analysis', {
               token: this.state.AuthToken,
               songID:song.id,
               artwork: song.artwork,
@@ -445,7 +419,7 @@ class PlaylistItems extends React.Component<Props, any>{
               mode: song.mode,
               // in depth audio features
               valence: song.valence,
-              liveliness: song.liveliness,
+              liveness: song.liveness,
               speechiness: song.speechiness,
               instrumentalness: song.instrumentalness,
               energy: song.energy,
@@ -463,15 +437,11 @@ class PlaylistItems extends React.Component<Props, any>{
             <Text style={styles.songTextAlbum}>{song.album}</Text>
           </View>
           <View style={styles.songRight}>
-            {/* <View style={styles.rightLeft}> */}
               <Text style={styles.songText}>{song.duration}</Text>
               <Text style={styles.songText}>{song.key}</Text>
               <Text style={styles.songText}>{Math.round(song.energy * 10)}</Text>
-            {/* </View> */}
-            {/* <View style={styles.rightRight}> */}
               <Text style={styles.songText}>{song.bpm}</Text>
               <Text style={styles.songText}>{song.timeSig}</Text>
-            {/* </View> */}
           </View>
         </TouchableOpacity>
       )})
@@ -496,46 +466,46 @@ class PlaylistItems extends React.Component<Props, any>{
           </View>
           <View style={{flexDirection: 'row', justifyContent:'space-between', marginTop: '5%'}}>
             <View style = {styles.threeKeyContainer}>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>{this.filterPlaylist('key', 0);}}>
+              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 0))}>
                 <Text style={styles.filterSpecText}>    C    </Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>{this.filterPlaylist('key', 1);}}>
+              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 1))}>
                 <Text style={styles.filterSpecText}>C♯ / D♭</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>{this.filterPlaylist('key', 2);}}>
+              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 2))}>
                 <Text style={styles.filterSpecText}>    D    </Text>
               </TouchableOpacity>
             </View>
             <View style = {styles.threeKeyContainer}>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>{this.filterPlaylist('key', 3);}}>
+              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 3))}>
                 <Text style={styles.filterSpecText}>D♯ / E♭</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>{this.filterPlaylist('key', 4);}}>
+              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 4))}>
                 <Text style={styles.filterSpecText}>    E    </Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>{this.filterPlaylist('key', 5);}}>
+              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 5))}>
                 <Text style={styles.filterSpecText}>    F    </Text>
               </TouchableOpacity>
             </View>
             <View style = {styles.threeKeyContainer}>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>{this.filterPlaylist('key', 6);}}>
+              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 6))}>
                 <Text style={styles.filterSpecText}>F♯ / G♭</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>{this.filterPlaylist('key', 7);}}>
+              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 7))}>
                 <Text style={styles.filterSpecText}>    G    </Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>{this.filterPlaylist('key', 8);}}>
+              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 8))}>
                 <Text style={styles.filterSpecText}>G♯ / A♭</Text>
               </TouchableOpacity>
             </View>
             <View style = {styles.threeKeyContainer}>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>{this.filterPlaylist('key', 9);}}>
+              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 9))}>
                 <Text style={styles.filterSpecText}>    A    </Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>{this.filterPlaylist('key', 10);}}>
+              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 10))}>
                 <Text style={styles.filterSpecText}>A♯ / B♭</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>{this.filterPlaylist('key', 11);}}>
+              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 11))}>
                 <Text style={styles.filterSpecText}>    B    </Text>
               </TouchableOpacity>
             </View>
@@ -575,8 +545,8 @@ class PlaylistItems extends React.Component<Props, any>{
               />
           </View>
           <View style={{flexDirection: 'row', justifyContent:'space-evenly',marginBottom:'3%', marginTop: '1%',}}>
-            <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#5BCC96', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius:50}} onPress={()=>{this.filterPlaylist('energy', {minEnergy:this.state.min, maxEnergy:this.state.max})}}>
-              <Text style={{color:'white', alignSelf:'center', fontFamily:'Segoe UI'}}>FILTER</Text>
+            <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#1DB954', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius:50, shadowColor:'black',shadowRadius:5, shadowOffset:{width:1,height:1}}} onPress={()=>{this.filterPlaylist('energy', {minEnergy:this.state.min, maxEnergy:this.state.max})}}>
+              <Text style={{color:'white', alignSelf:'center', fontFamily:'Segoe UI', letterSpacing:1, fontWeight:'600'}}>FILTER</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -598,7 +568,6 @@ class PlaylistItems extends React.Component<Props, any>{
             <TextInput
               style={styles.filterSpecInput}
               onChangeText = {minBpm=>this.setState({min:parseInt(minBpm)})}
-              // placeholder={'0'}
               allowFontScaling = {true}
               placeholderTextColor='#C4C4C4'
               />
@@ -608,14 +577,13 @@ class PlaylistItems extends React.Component<Props, any>{
             <TextInput
               style={styles.filterSpecInput}
               onChangeText = {maxBpm=>this.setState({max:parseInt(maxBpm)})}
-              // placeholder={'10'}
               allowFontScaling = {true}
               placeholderTextColor='#C4C4C4'
               />
           </View>
           <View style={{flexDirection: 'row', justifyContent:'space-evenly',marginBottom:'3%', marginTop: '1%',}}>
-            <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#5BCC96', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius:50}} onPress={()=>{this.filterPlaylist('bpm', {minBpm:this.state.min, maxBpm:this.state.max})}}>
-              <Text style={{color:'white', alignSelf:'center', fontFamily:'Segoe UI'}}>FILTER</Text>
+            <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#1DB954', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius:50, shadowColor:'black',shadowRadius:5, shadowOffset:{width:1,height:1}}} onPress={()=>{this.filterPlaylist('bpm', {minBpm:this.state.min, maxBpm:this.state.max})}}>
+              <Text style={{color:'white', alignSelf:'center', fontFamily:'Segoe UI', letterSpacing:1, fontWeight:'600'}}>FILTER</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -637,14 +605,13 @@ class PlaylistItems extends React.Component<Props, any>{
             <TextInput
               style={styles.filterSpecInput}
               onChangeText = {timeSig=>this.setState({max:parseInt(timeSig)})}
-              // placeholder={'10'}
               allowFontScaling = {true}
               placeholderTextColor='#C4C4C4'
               />
           </View>
           <View style={{flexDirection: 'row', justifyContent:'space-evenly',marginBottom:'3%', marginTop: '1%',}}>
-            <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#5BCC96', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius:50}} onPress={()=>{this.filterPlaylist('time sig.', this.state.max)}}>
-              <Text style={{color:'white', alignSelf:'center', fontFamily:'Segoe UI'}}>FILTER</Text>
+            <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#1DB954', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius:50, shadowColor:'black',shadowRadius:5, shadowOffset:{width:1,height:1}}} onPress={()=>{this.filterPlaylist('time sig.', this.state.max)}}>
+              <Text style={{color:'white', alignSelf:'center', fontFamily:'Segoe UI', letterSpacing:1, fontWeight:'600'}}>FILTER</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -653,8 +620,7 @@ class PlaylistItems extends React.Component<Props, any>{
   }
 
   render(){return (
-    // <ImageBackground source = {{uri:this.state.ImageUrl}} style = {styles.backgroundimage} imageStyle={{resizeMode:'cover'}} blurRadius= {200}>
-    <View style={{backgroundColor:'#353535', minHeight:'100vh'}}>
+    <LinearGradient  colors = {['#353535', '#494949','#252525']} style={{minHeight:'100vh'}}>
       <ScrollView style = {{paddingBottom:'3%'}}>
         <View style={styles.headerContainer}>
           <View style={styles.playlistContainer}>
@@ -675,7 +641,7 @@ class PlaylistItems extends React.Component<Props, any>{
         {this.renderFilterSpecs()}
         <View style={styles.optionsContainer}>
           <View style={styles.leftOptions}>
-            <Text style={styles.optionsText}>filter by:</Text>
+            <Text style={styles.optionsText}>FILTER BY:</Text>
             <TouchableOpacity style={styles.optionsButton} onPress={()=>{this.setState({showFilterSpecs:'key'})}}>
               <Text style={styles.navText}>key</Text>
             </TouchableOpacity>
@@ -702,7 +668,7 @@ class PlaylistItems extends React.Component<Props, any>{
             <Text style={styles.barText}>DUR.</Text>
             <Text style={styles.barText} onPress={()=>(this.sortPlaylist('key'))}>KEY ˬ</Text>
             <Text style={styles.barText} onPress={()=>(this.sortPlaylist('energy'))}>ENERGY ˬ</Text>
-            <TouchableOpacity style={styles.barText} onPress={()=>(this.sortPlaylist('bpm'))}>BPM ˬ</TouchableOpacity>
+            <Text style={styles.barText} onPress={()=>(this.sortPlaylist('bpm'))}>BPM ˬ</Text>
             <Text style={styles.barText} onPress={()=>(this.sortPlaylist('timeSig'))}>TIME SIG. ˬ</Text>
           </View>
         </View>
@@ -710,8 +676,7 @@ class PlaylistItems extends React.Component<Props, any>{
         {this.state.BasicInfo}
 
       </ScrollView>
-    {/* </ImageBackground> */}
-    </View>
+    </LinearGradient>
   );}
 }
 
@@ -721,25 +686,22 @@ const styles = StyleSheet.create({
     fontFamily: 'Segoe UI',
     textShadowColor:'black',
     textShadowRadius:4,
+    textShadowOffset:{width:2,height:2},
     textAlign: 'center',
   },
   filterSpecContainer:{
-    // height:100,
     zIndex:5,
     position:'absolute',
-    // alignSelf:'flex-end',
-    marginLeft:'7%',
+    marginLeft:'9%',
     backgroundColor: '#282727',
     marginTop:'5%',
     width:'20%',
     padding:'1%',
   },
   filterSpecInputContainer:{
-    // height:100,
     zIndex:5,
     position:'absolute',
-    // alignSelf:'flex-end',
-    marginLeft:'12%',
+    marginLeft:'13%',
     backgroundColor: '#282727',
     marginTop:'2%',
     width:'12%',
@@ -752,20 +714,18 @@ const styles = StyleSheet.create({
   filterSpecButton:{
     marginVertical:'10%',
     paddingVertical:'2%',
-    // paddingHorizontal:'1%',
     alignSelf: 'center',
-    // backgroundColor:'#C4C4C4',
     width:'120%',
     textAlign: 'center',
     borderWidth:1,
     borderColor:'#E5E5E5'
-    // width:60,
   },
   filterSpecText:{
     fontSize:12,
     fontFamily: 'Segoe UI',
     textShadowColor:'black',
     textShadowRadius:4,
+    textShadowOffset:{width:2,height:2},
     color:'white',
   },
   filterSpecMinMaxText:{
@@ -773,6 +733,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Segoe UI',
     textShadowColor:'black',
     textShadowRadius:4,
+    textShadowOffset:{width:2,height:2},
     color:'white',
     paddingRight:'20%'
   },
@@ -798,9 +759,11 @@ const styles = StyleSheet.create({
   optionsText: {
     color:'white',
     fontFamily:'Segoe UI',
-    textShadowColor:'black',
-    textShadowRadius:4,
+    textShadowColor:'white',
+    textShadowRadius:1,
+    fontWeight:'600',
     fontSize:14,
+    letterSpacing:1,
     paddingRight: '1%'
   },
   optionsNav: {
@@ -839,28 +802,19 @@ const styles = StyleSheet.create({
     padding:10,
     flexDirection:'row',
     alignSelf:'center',
-    // marginTop:10,
     justifyContent:'space-between',
-    shadowColor:'black',
-    shadowRadius:3,
-    // marginRight: 10
+    shadowColor:'white',
+    shadowRadius:4,
   },
   leftBar: {
-    // width:142,
     width:'26%',
     paddingLeft: '7%',
-    // textAlign:'right',
-    // marginLeft:10,
   },
   middleBar: {
-    // width:260,
     width:'35%',
     flexDirection:'row',
-    // justifyContent:'space-between',
-    // marginLeft:-45, // Going to start making edits
   },
   rightBar: {
-    // width:420,
     width:'36%',
     flexDirection:'row',
     justifyContent:'space-between',
@@ -869,8 +823,8 @@ const styles = StyleSheet.create({
     color:'white',
     fontSize:18,
     fontWeight: '700',
-    textShadowColor:'black',
-    textShadowRadius:4,
+    textShadowColor:'white',
+    textShadowRadius:1,
     flex:1
   },
   barTextArtist: {
@@ -878,13 +832,12 @@ const styles = StyleSheet.create({
     fontSize:18,
     fontWeight: '700',
     flex: 1,
-    textShadowColor:'black',
-    textShadowRadius:4,
+    textShadowColor:'white',
+    textShadowRadius:1,
     paddingRight: '2%'
   },
   songList: {
     width:'95%',
-    // height:'100%',
     height: 110,
     padding:10,
     borderBottomWidth:1,
@@ -895,21 +848,16 @@ const styles = StyleSheet.create({
     justifyContent:'space-between'
   },
   songLeft: {
-    // width:240,
     width: '26%',
     flexDirection:'row',
     justifyContent:'space-between',
   },
   songMiddle: {
-    // width:400,
     width: '35%',
     flexDirection:'row',
-    // justifyContent:'space-between',
     textAlign:'left',
-    // marginLeft: '2%',
   },
   songRight: {
-    // width:360,
     width: '36%',
     flexDirection:'row',
     textAlign:'left',
@@ -917,11 +865,6 @@ const styles = StyleSheet.create({
   albumArtwork: {
     width:'25%',
     height:'100%',
-    // paddingRight: '2%',
-    // width:imageHeight/19,
-    // height:imageWidth/19,
-    // marginRight: '4%',
-    // marginLeft: '-4%',
     resizeMode: 'contain',
   },
   songTextArtist: {
@@ -930,10 +873,8 @@ const styles = StyleSheet.create({
     fontFamily:'Segoe UI',
     textShadowColor:'black',
     textShadowRadius:4,
+    textShadowOffset:{width:2,height:2},
     flex:1,
-    // width: '100%',
-    // paddingHorizontal: '2%',
-    // paddingLeft: '2%',
     paddingRight: '2%',
   },
   songTextAlbum: {
@@ -942,9 +883,8 @@ const styles = StyleSheet.create({
     fontFamily:'Segoe UI',
     textShadowColor:'black',
     textShadowRadius:4,
+    textShadowOffset:{width:2,height:2},
     flex:1,
-    // width: '80%',
-    // marginLeft: '9%',
   },
   songText: {
     color:'white',
@@ -952,6 +892,7 @@ const styles = StyleSheet.create({
     fontFamily:'Segoe UI',
     textShadowColor:'black',
     textShadowRadius:4,
+    textShadowOffset:{width:2,height:2},
     flex:1,
   },
   songTextTrack: {
@@ -960,88 +901,70 @@ const styles = StyleSheet.create({
     fontFamily:'Segoe UI',
     textShadowColor:'black',
     textShadowRadius:4,
+    textShadowOffset:{width:2,height:2},
     flex:1,
     width: '80%',
     paddingHorizontal: '2%',
   },
   rightLeft: {  // dur, key, energy
-    // width:160,
     flexDirection:'row',
     justifyContent:'space-between',
   },
   rightRight: { // bpm, timeSig
-    // width:250,
     marginLeft:35,
     flexDirection:'row',
     justifyContent:'space-between',
-    // marginRight:10
   },
   backgroundimage: {
     flex: 1,
     resizeMode: 'cover',
-    // minWidth: imageWidth,
-    // // resizeMethod: 'resize',
     justifyContent: "center",
-    // alignItems: 'center',
-    // alignText: 'center',
-    // alignContent: 'center',
     minHeight: '100vh',
-    minWidth:'100%'
-    // height: imageHeight-45,
+    minWidth:'100%',
   },
   headerContainer:{
     flexDirection: 'row',
     width: '95%',
-    // alignItems: 'center',
     alignSelf: 'center',
     justifyContent: 'space-between',
     marginVertical: '1%'
   },
   spotifyButton:{
-    backgroundColor: '#5BCC96',
+    backgroundColor: '#1DB954',
     justifyContent: 'center',
-    // paddingVertical: '1%',
-    // paddingHorizontal: '1%',
     borderRadius: 100,
     marginTop: '1%',
-    // alignSelf:'center',
-    // alignContent: 'center',
-    width: 120,
-    height:'5vh'
+    width: 150,
+    height:'4vh',
+    shadowColor:'black',
+    shadowRadius:6,
+    shadowOffset:{width:2,height:1}
   },
   buttonText:{
     color:'white',
     fontSize: 12,
     fontWeight: '600',
     fontFamily: 'Segoe UI',
-    textShadowColor:'black',
-    textShadowRadius:4,
     textAlign: 'center',
     alignSelf: 'center'
   },
   playlistContainer:{
     flexDirection: 'row',
-    // justifyContent: 'space-between',
   },
   playArtContainer:{
     width:'30vh',
     height:'30vh',
-    // paddingVertical: '5%',
     justifyContent: 'center',
     alignItems: 'center',
   },
   playlistArtwork:{
     width: '100%',
     height: '100%', 
-    // padding: '100%',
     resizeMode: 'contain',
-    // marginLeft: '4%',
-    // resizeMethod:'auto'
   },
   playlistInfo:{
     justifyContent: 'space-evenly',
     flexDirection: 'column',
-    // paddingVertical: '10%',
     marginLeft: 10,
     width: '100%'
   },
@@ -1051,6 +974,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Segoe UI',
     textShadowColor:'black',
     textShadowRadius:4,
+    textShadowOffset:{width:2,height:2},
     fontWeight: '600'
   },
   playlistUser:{
@@ -1059,6 +983,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Segoe UI',
     textShadowColor:'black',
     textShadowRadius:4,
+    textShadowOffset:{width:2,height:2},
     fontWeight: '600',
   },
   playlistDesc:{
@@ -1067,6 +992,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Segoe UI',
     textShadowColor:'black',
     textShadowRadius:4,
+    textShadowOffset:{width:2,height:2},
     width: '90%',
   },
   trackAmount:{
@@ -1075,6 +1001,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Segoe UI',
     textShadowColor:'black',
     textShadowRadius:4,
+    textShadowOffset:{width:2,height:2},
   },
 
 })

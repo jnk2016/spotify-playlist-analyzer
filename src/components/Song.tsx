@@ -1,8 +1,7 @@
-import React, {Component, useState} from 'react';
-import {Button, Image, StyleSheet, Dimensions, TextInput, TouchableOpacity, Text, View, Alert, ScrollView, ImageBackground} from 'react-native';
+import React, {Component} from 'react';
+import { Image, StyleSheet, TouchableOpacity, Text, View, ImageBackground} from 'react-native';
 import axios from 'axios';
 import {PieChart} from 'react-minimal-pie-chart';
-import in_your_head from '../assets/images/in_your_head.jpeg';
 import AxiosGetTrackAnalysis from '../requests/AxiosGetTrackAnalysis';
 
 interface Props{
@@ -34,7 +33,7 @@ class Song extends React.Component<Props, any>{
       segments: '', // Not included in route params
       /* In Depth Detail */
       valence: this.props.route.params.valence,
-      liveliness: this.props.route.params.liveliness,
+      liveness: this.props.route.params.liveness,
       speechiness: this.props.route.params.speechiness,
       instrumentalness: this.props.route.params.instrumentalness,
       energy: this.props.route.params.energy,
@@ -72,68 +71,62 @@ class Song extends React.Component<Props, any>{
           <Text style={styles.buttonText}>PLAY ON SPOTIFY</Text>
         </TouchableOpacity>
         <View style={{justifyContent: 'center'}}>
-          {/* <View style={styles.circleImage}> */}
-          <Image source={{uri: this.state.artwork}} style={{ height: 500, width: 500, resizeMode: 'contain', alignSelf: 'center', borderRadius: 500, zIndex: 2,}} blurRadius={20}/>
-          <View style={{zIndex:4, opacity: .4,position: 'absolute', justifyContent: 'center', alignSelf: 'center', alignContent: 'center', alignItems: 'center', height: 400, width: 400}}>
+          <View style={{shadowColor:'black',shadowRadius:70,  height: 500, width: 500, alignSelf: 'center', borderRadius: 500, zIndex:3,}}>
+            <Image source={{uri: this.state.artwork}} style={{resizeMode:'contain', height: 500, width: 500, alignSelf: 'center', borderRadius: 500, zIndex:3,}} blurRadius={20}/>
+          </View>
+          <View style={{zIndex:4, opacity: .5,position: 'absolute', justifyContent: 'center', alignSelf: 'center', alignContent: 'center', alignItems: 'center', height: 400, width: 400}}>
             <PieChart style={{alignSelf: 'center', justifySelf: 'center', justifyItems: 'center', alignContent: 'center', alignItems: 'center', verticalAlign: 'center'}}
               data={[
-                  { title: 'One', value: Math.round(this.state.energy*100), color: '#D630FF' },
-                  { title: 'Two', value: 100-Math.round(this.state.energy*100), color: '#EEAAFF' },
-                  // { title: 'Two', value: 85, color: '#FFF9C3' },
+                  { title: 'energy', value: Math.round(this.state.energy*100), color: '#D630FF' },
+                  { title: 'energy', value: 100-Math.round(this.state.energy*100), color: '#EEAAFF' },
               ]} lineWidth={15} viewBoxSize={[100,100]} totalValue={200} startAngle={90}
             />
           </View>
-          <View style={{zIndex:4, opacity: .4,position: 'absolute', justifyContent: 'center', alignSelf: 'center', alignContent: 'center', alignItems: 'center', height: 341, width: 341}}>
+          <View style={{zIndex:4, opacity: .5,position: 'absolute', justifyContent: 'center', alignSelf: 'center', alignContent: 'center', alignItems: 'center', height: 341, width: 341}}>
             <PieChart style={{alignSelf: 'center', justifySelf: 'center', justifyItems: 'center', alignContent: 'center', alignItems: 'center', verticalAlign: 'center'}}
               data={[
-                  { title: 'One', value: Math.round(this.state.valence*100), color: '#3E3BD6' },
-                  { title: 'Two', value: 100-Math.round(this.state.valence*100), color: '#8E8CD4' },
-                  // { title: 'Two', value: 85, color: '#FFF9C3' },
+                  { title: 'valence', value: Math.round(this.state.valence*100), color: '#3E3BD6' },
+                  { title: 'valence', value: 100-Math.round(this.state.valence*100), color: '#8E8CD4' },
               ]} lineWidth={16} viewBoxSize={[100,100]} totalValue={200} startAngle={90}
             />
           </View>
-          <View style={{zIndex:4, opacity: .4,position: 'absolute', justifyContent: 'center', alignSelf: 'center', alignContent: 'center', alignItems: 'center', height: 287, width: 287}}>
+          <View style={{zIndex:4, opacity: .5,position: 'absolute', justifyContent: 'center', alignSelf: 'center', alignContent: 'center', alignItems: 'center', height: 287, width: 287}}>
             <PieChart style={{alignSelf: 'center', justifySelf: 'center', justifyItems: 'center', alignContent: 'center', alignItems: 'center', verticalAlign: 'center'}}
               data={[
-                  { title: 'One', value: Math.round(this.state.danceability*100), color: '#7280FF' },
-                  { title: 'Two', value: 100-Math.round(this.state.danceability*100), color: '#A5AEFF' },
-                  // { title: 'Two', value: 85, color: '#FFF9C3' },
+                  { title: 'danceability', value: Math.round(this.state.danceability*100), color: '#4D6BF8' },
+                  { title: 'danceability', value: 100-Math.round(this.state.danceability*100), color: '#A5AEFF' },
               ]} lineWidth={18} viewBoxSize={[100,100]} totalValue={200} startAngle={90}
             />
           </View>
-          <View style={{zIndex:4, opacity: .4,position: 'absolute', justifyContent: 'center', alignSelf: 'center', alignContent: 'center', alignItems: 'center', height: 236, width: 236}}>
+          <View style={{zIndex:4, opacity: .5,position: 'absolute', justifyContent: 'center', alignSelf: 'center', alignContent: 'center', alignItems: 'center', height: 236, width: 236}}>
             <PieChart style={{alignSelf: 'center', justifySelf: 'center', justifyItems: 'center', alignContent: 'center', alignItems: 'center', verticalAlign: 'center'}}
               data={[
-                  { title: 'One', value: Math.round(this.state.acousticness*100), color: '#5BCC96' },
-                  { title: 'Two', value: 100-Math.round(this.state.acousticness*100), color: '#96EAC2' },
-                  // { title: 'Two', value: 85, color: '#FFF9C3' },
+                  { title: 'acousticness', value: Math.round(this.state.acousticness*100), color: '#5BCC96' },
+                  { title: 'acousticness', value: 100-Math.round(this.state.acousticness*100), color: '#96EAC2' },
               ]} lineWidth={21} viewBoxSize={[100,100]} totalValue={200} startAngle={90}
             />
           </View>
-          <View style={{zIndex:4, opacity: .4,position: 'absolute', justifyContent: 'center', alignSelf: 'center', alignContent: 'center', alignItems: 'center', height: 186, width: 186}}>
+          <View style={{zIndex:4, opacity: .5,position: 'absolute', justifyContent: 'center', alignSelf: 'center', alignContent: 'center', alignItems: 'center', height: 186, width: 186}}>
             <PieChart style={{alignSelf: 'center', justifySelf: 'center', justifyItems: 'center', alignContent: 'center', alignItems: 'center', verticalAlign: 'center'}}
               data={[
-                  { title: 'One', value: Math.round(this.state.instrumentalness*100), color: '#FFE70F' },
-                  { title: 'Two', value: 100-Math.round(this.state.instrumentalness*100), color: '#FFF7B1' },
-                  // { title: 'Two', value: 85, color: '#FFF9C3' },
+                  { title: 'instrumentalness', value: Math.round(this.state.instrumentalness*100), color: '#FFE70F' },
+                  { title: 'instrumentalness', value: 100-Math.round(this.state.instrumentalness*100), color: '#FFF7B1' },
               ]} lineWidth={27} viewBoxSize={[100,100]} totalValue={200} startAngle={90}
             />
           </View>
-          <View style={{zIndex:4, opacity: .4,position: 'absolute', justifyContent: 'center', alignSelf: 'center', alignContent: 'center', alignItems: 'center', height: 137, width: 137}}>
+          <View style={{zIndex:4, opacity: .5,position: 'absolute', justifyContent: 'center', alignSelf: 'center', alignContent: 'center', alignItems: 'center', height: 137, width: 137}}>
             <PieChart style={{alignSelf: 'center', justifySelf: 'center', justifyItems: 'center', alignContent: 'center', alignItems: 'center', verticalAlign: 'center'}}
               data={[
-                  { title: 'One', value: Math.round(this.state.speechiness*100), color: '#FF7A00' },
-                  { title: 'Two', value: 100-Math.round(this.state.speechiness*100), color: '#FFC48D' },
-                  // { title: 'Two', value: 85, color: '#FFF9C3' },
+                  { title: 'liveness', value: Math.round(this.state.liveness*100), color: '#FF7A00' },
+                  { title: 'liveness', value: 100-Math.round(this.state.liveness*100), color: '#FFC48D' },
               ]} lineWidth={34} viewBoxSize={[100,100]} totalValue={200} startAngle={90}
             />
           </View>
-          <View style={{zIndex:4, opacity: .4,position: 'absolute', justifyContent: 'center', alignSelf: 'center', alignContent: 'center', alignItems: 'center', height: 91, width: 91}}>
+          <View style={{zIndex:4, opacity: .5,position: 'absolute', justifyContent: 'center', alignSelf: 'center', alignContent: 'center', alignItems: 'center', height: 91, width: 91}}>
             <PieChart style={{alignSelf: 'center', justifySelf: 'center', justifyItems: 'center', alignContent: 'center', alignItems: 'center', verticalAlign: 'center'}}
               data={[
-                  { title: 'One', value: Math.round(this.state.liveliness*100), color: '#FF0000' },
-                  { title: 'Two', value: 100-Math.round(this.state.liveliness*100), color: '#FF9696' },
-                  // { title: 'Two', value: 85, color: '#FFF9C3' },
+                  { title: 'speechiness', value: Math.round(this.state.speechiness*100), color: '#FF0000' },
+                  { title: 'speechiness', value: 100-Math.round(this.state.speechiness*100), color: '#FF9696' },
               ]} lineWidth={41} viewBoxSize={[100,100]} totalValue={200} startAngle={90}
             />
           </View>
@@ -158,14 +151,15 @@ class Song extends React.Component<Props, any>{
             <Text style={styles.graphValues}>{this.state.instrumentalness}</Text>
           </View>
           <View style={{zIndex:5,position: 'absolute', alignSelf: 'auto', height: 137, justifyContent: 'space-between', marginLeft: '51%'}}>
-            <Text style={styles.graphValues}>speechiness</Text>
+            <Text style={styles.graphValues}>liveness</Text>
             <Text style={styles.graphValues}>{this.state.speechiness}</Text>
           </View>
           <View style={{zIndex:5,position: 'absolute', alignSelf: 'auto', height: 91, justifyContent: 'space-between', marginLeft: '51%'}}>
-            <Text style={styles.graphValues}>liveliness</Text>
-            <Text style={styles.graphValues}>{this.state.liveliness}</Text>
+            <Text style={styles.graphValues}>speechiness</Text>
+            <Text style={styles.graphValues}>{this.state.liveness}</Text>
           </View>
-          <View style={{zIndex:0,position: 'absolute', alignSelf: 'center',  width: '100%'}}>
+          <View style={{zIndex:0,position: 'absolute', alignSelf: 'center',  width: '100%',}}>
+          <View style={{zIndex:-1,position: 'absolute', alignSelf: 'center',  width: '98%', height:'100%', backgroundColor:'black', opacity:.1, borderColor:'white',borderWidth:1}}/>
             <View style={styles.line}>
               <View style={styles.featureContainer}>
                 <Text style={styles.statTextLeft}>{this.state.duration}</Text>
@@ -232,48 +226,48 @@ const styles = StyleSheet.create({
     color: 'white',
     fontFamily:'Segoe UI',
     textShadowColor:'black',
-    textShadowRadius:4,
+    textShadowRadius:3,
+    textShadowOffset: {width:2,height:1},
     letterSpacing:1,
     fontSize: 25,
     fontWeight: '700',
     textAlign: 'left',
-    // marginVertical: '2%',
   },
   songArtist:{
     color: 'white',
     fontFamily:'Segoe UI',
     textShadowColor:'black',
-    textShadowRadius:4,
+    textShadowRadius:3,
+    textShadowOffset: {width:2,height:1},
     letterSpacing:1,
     fontSize: 20,
     fontWeight: '500',
     textAlign: 'left',
-    // marginVertical: '2%',
   },
   songTypeYear:{
     color: 'white',
     fontFamily:'Segoe UI',
     textShadowColor:'black',
-    textShadowRadius:4,
+    textShadowRadius:3,
+    textShadowOffset: {width:2,height:1},
     letterSpacing:1,
     fontSize: 15,
     textAlign: 'left',
-    // marginVertical: '2%',
   },
   songInfoContainer:{
-    // width: '60%',
     alignSelf: 'center',
-    marginBottom: '2%',
+    // marginBottom: '2%',
+    paddingBottom:'1vh',
     marginTop:'1%',
     justifyContent:'space-between',
     height: '15%',
-    // paddingBottom:'10%'
   },
   statTextLeft:{
     color: 'white',
     fontFamily:'Segoe UI',
     textShadowColor:'black',
-    textShadowRadius:4,
+    textShadowRadius:3,
+    textShadowOffset: {width:2,height:1},
     letterSpacing:1,
     fontSize: 20,
     fontWeight: '700',
@@ -282,7 +276,8 @@ const styles = StyleSheet.create({
     color: 'white',
     fontFamily:'Segoe UI',
     textShadowColor:'black',
-    textShadowRadius:4,
+    textShadowRadius:3,
+    textShadowOffset: {width:2,height:1},
     letterSpacing:1,
     fontSize: 20,
     fontWeight: '700',
@@ -292,7 +287,8 @@ const styles = StyleSheet.create({
     color: 'white',
     fontFamily: 'Segoe UI',
     textShadowColor:'black',
-    textShadowRadius:4,
+    textShadowRadius:3,
+    textShadowOffset: {width:2,height:1},
     letterSpacing:1,
     fontSize: 15,
   },
@@ -300,7 +296,8 @@ const styles = StyleSheet.create({
     color: 'white',
     fontFamily: 'Segoe UI',
     textShadowColor:'black',
-    textShadowRadius:4,
+    textShadowRadius:3,
+    textShadowOffset: {width:2,height:1},
     letterSpacing:1,
     fontSize: 15,
     textAlign: 'right',
@@ -309,7 +306,8 @@ const styles = StyleSheet.create({
     color: 'white',
     fontFamily: 'Segoe UI',
     textShadowColor:'black',
-    textShadowRadius:4,
+    textShadowRadius:3,
+    textShadowOffset: {width:2,height:1},
     letterSpacing:1,
     fontSize: 12,
     textAlign: 'left'
@@ -337,32 +335,26 @@ const styles = StyleSheet.create({
     zIndex: 4,
   },
   backgroundimage: {
-    // flex: 1,
     resizeMode: 'cover',
-    // justifyContent: "center",
-    // alignItems: 'center',
-    // alignText: 'center',
-    // alignContent: 'center',
-    minHeight: '91vh',
-    // height: imageHeight-45,
+    minHeight: '100vh',
+    marginTop:-65
   },
   spotifyButton:{
-    backgroundColor: '#5BCC96',
-    // justifyContent: 'center',
-    paddingVertical: 10,
-    // paddingHorizontal: '5%',
+    backgroundColor: '#1DB954',
+    justifyContent:'center',
     borderRadius: 100,
-    // marginTop: '10%',
-    // alignSelf:'center',
-    // alignContent: 'center',
     width: 150,
-    height:'5vh',
+    height:'4vh',
     alignSelf: 'flex-end',
-    // marginTop: '2%',
     marginRight: '2%',
     marginBottom: '-1%',
+    marginTop: 80,
     textAlign: 'center',
     textAlignVertical:'center',
+    shadowColor:'black',
+    shadowRadius:6,
+    shadowOffset:{width:2,height:1},
+    zIndex:1,
   },
   buttonText:{
     color:'white',
@@ -372,7 +364,6 @@ const styles = StyleSheet.create({
     letterSpacing:1,
     textAlign: 'center',
     textAlignVertical:'center',
-    // alignSelf: 'center'
   },
 })
 

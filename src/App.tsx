@@ -29,9 +29,9 @@ function App() {
 
   const Stack = createStackNavigator();
   return (
-    <NavigationContainer fallback={<Text>Loading...</Text>}>
-      <Stack.Navigator initialRouteName={'Home'}>
-        <Stack.Screen name='Song' component={Song} 
+    <NavigationContainer fallback={<View><Text>Loading...</Text></View>}>
+      <Stack.Navigator initialRouteName={'Spotify Public Playlist Analyzer'}>
+        <Stack.Screen name='Song Analysis' component={Song} 
           options={{
             headerBackImage: ()=>(<Image source={{uri:goback}} style={{height:60, width:60, resizeMode:'contain'}}/>),
             headerShown: true, 
@@ -39,16 +39,18 @@ function App() {
             headerStyle: {
               borderBottomColor: 'transparent',
               backgroundColor: '#282727', //Set Header color
-              elevation: 0,
+              elevation: 5,
+              shadowColor:'black',
+              shadowRadius:10,
             },
             headerTitleStyle: {
               fontWeight: '600', //Set Header text style
               fontFamily: 'Segoe UI',
-              letterSpacing:1,
+              letterSpacing:2,
               color:'white',
             },
           }}/>
-        <Stack.Screen name='Playlist' component={Playlist}
+        <Stack.Screen name='Playlist Analysis' component={Playlist}
           options={{
             headerBackImage: ()=>(<Image source={{uri:spotifylogo}} style={{height:50, width:50, resizeMode:'contain'}}/>),
             headerShown: true, 
@@ -56,16 +58,18 @@ function App() {
             headerStyle: {
               borderBottomColor: 'transparent',
               backgroundColor: '#282727', //Set Header color
-              elevation: 0,
+              elevation: 5,
+              shadowColor:'black',
+              shadowRadius:10,
             },
             headerTitleStyle: {
               fontWeight: '600', //Set Header text style
               fontFamily: 'Segoe UI',
-              letterSpacing:1,
+              letterSpacing:2,
               color:'white',
             },
           }}/>
-        <Stack.Screen name='Home' component={Home} options={{headerShown: false}}/>
+        <Stack.Screen name='Spotify Public Playlist Analyzer' component={Home} options={{headerShown: false}}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
