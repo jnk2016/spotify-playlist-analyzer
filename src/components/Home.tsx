@@ -8,6 +8,8 @@ import skipIcon from '../assets/images/skipIcon.jpg';
 import emptySongAlbum from '../assets/images/emptySongAlbum.jpg';
 import linkedInLogo from '../assets/images/linkedinLogo.png';
 import LinearGradient from '../assets/Features/LinearGradient';
+import CheckMark from '../assets/images/Checkmark.png';
+import { BrowserView, MobileView } from "react-device-detect";
 
 interface Props{
   navigation:any
@@ -17,71 +19,89 @@ class Home extends React.Component<Props, any>{
   constructor(props: Props | Readonly<Props>) {
     super(props)
     this.state = {
-      infoType:'data',
+      // infoType:'data',
       uri: '0fCpH2h614ebCnRW4Wmy9L',
     };
   }
   
-  renderInfo=()=>{
-    if(this.state.infoType=='data'){
+  renderInfo=(infoType:any)=>{
+    if(infoType=='data'){
       return(
-        <View style={styles.rightSide}>
-          <Text style={styles.rightHeaderText}>SORT BY</Text>
-          <Text style={styles.rightDataText}>BPM</Text>
-          <Text style={styles.rightDataText}>KEY</Text>
-          <Text style={styles.rightDataText}>ENERGY</Text>
-          <Text style={styles.rightDataText}>NAME</Text>
-          <Text style={styles.rightDataText}>ARTISTS</Text>
-          <Text style={styles.rightDataText}>TIME SIG</Text>
-        </View>
+          <View style={styles.dataContainer}>
+            <Text style={styles.infoHeaderText}>SORT BY</Text>
+            <View style={styles.rightData}>
+              <Image source={{uri:CheckMark}} style={{height:'5vh', width:'5vh', resizeMode: 'contain', tintColor:'white'}}/>
+              <Text style={styles.rightDataText}>BPM</Text>
+            </View>
+            <View style={styles.rightData}>
+              <Image source={{uri:CheckMark}} style={{height:'5vh', width:'5vh', resizeMode: 'contain', tintColor:'white'}}/>
+              <Text style={styles.rightDataText}>KEY</Text>
+            </View>
+            <View style={styles.rightData}>
+              <Image source={{uri:CheckMark}} style={{height:'5vh', width:'5vh', resizeMode: 'contain', tintColor:'white'}}/>
+              <Text style={styles.rightDataText}>ENERGY</Text>
+            </View>
+            <View style={styles.rightData}>
+              <Image source={{uri:CheckMark}} style={{height:'5vh', width:'5vh', resizeMode: 'contain', tintColor:'white'}}/>
+              <Text style={styles.rightDataText}>NAME</Text>
+            </View>
+            <View style={styles.rightData}>
+              <Image source={{uri:CheckMark}} style={{height:'5vh', width:'5vh', resizeMode: 'contain', tintColor:'white'}}/>
+              <Text style={styles.rightDataText}>ARTISTS</Text>
+            </View>
+            <View style={styles.rightData}>
+              <Image source={{uri:CheckMark}} style={{height:'5vh', width:'5vh', resizeMode: 'contain', tintColor:'white'}}/>
+              <Text style={styles.rightDataText}>TIME SIG</Text>
+            </View>
+          </View>
       );
     }
-    else if(this.state.infoType=='features'){
+    else if(infoType=='features'){
       return(
-        <View style={styles.rightSideFeature}>
-          <Text style={styles.rightHeaderText}>FIND THE</Text>
+        <View style={styles.featureContainer}>
+          <Text style={styles.infoHeaderText}>FIND THE</Text>
           <View style={{flexDirection:'row', justifyContent:'space-evenly',}}>
-            <View>
+            <View style={{paddingLeft:'3%'}}>
               <View style={styles.rightFeaturesSingleContainer}>
-                <Image source={{uri:emptySongAlbum}} style={{height:'8vh', width:'5vw', resizeMode:'contain'}}/>
+                <Image source={{uri:emptySongAlbum}} style={{minHeight:40, minWidth: 40, resizeMode:'contain'}}/>
                 <Text style={styles.rightFeaturesText}>DURATION</Text>
               </View> 
               <View style={styles.rightFeaturesSingleContainer}>
-                <Image source={{uri:emptySongAlbum}} style={{height:'8vh', width:'5vw', resizeMode:'contain'}}/>
+                <Image source={{uri:emptySongAlbum}} style={{minHeight:40, minWidth: 40, resizeMode:'contain'}}/>
                 <Text style={styles.rightFeaturesText}>POPULARITY</Text>
               </View> 
               <View style={styles.rightFeaturesSingleContainer}>
-                <Image source={{uri:emptySongAlbum}} style={{height:'8vh', width:'5vw', resizeMode:'contain'}}/>
+                <Image source={{uri:emptySongAlbum}} style={{minHeight:40, minWidth: 40, resizeMode:'contain'}}/>
                 <Text style={styles.rightFeaturesText}>MODALITY</Text>
               </View> 
               <View style={styles.rightFeaturesSingleContainer}>
-                <Image source={{uri:emptySongAlbum}} style={{height:'8vh', width:'5vw', resizeMode:'contain'}}/>
-                <Text style={styles.rightFeaturesText}>TIME SIGNATURE</Text>
+                <Image source={{uri:emptySongAlbum}} style={{minHeight:40, minWidth: 40, resizeMode:'contain'}}/>
+                <Text style={styles.rightFeaturesText}>TIME SIG.</Text>
               </View> 
               <View style={styles.rightFeaturesSingleContainer}>
-                <Image source={{uri:emptySongAlbum}} style={{height:'8vh', width:'5vw', resizeMode:'contain'}}/>
+                <Image source={{uri:emptySongAlbum}} style={{minHeight:40, minWidth: 40, resizeMode:'contain'}}/>
                 <Text style={styles.rightFeaturesText}>SECTIONS</Text>
               </View> 
             </View>
-            <View>
+            <View style={{paddingLeft:'3%'}}>
               <View style={styles.rightFeaturesSingleContainer}>
-                <Image source={{uri:emptySongAlbum}} style={{height:'8vh', width:'5vw', resizeMode:'contain'}}/>
+                <Image source={{uri:emptySongAlbum}} style={{minHeight:40, minWidth: 40, resizeMode:'contain'}}/>
                 <Text style={styles.rightFeaturesText}>KEY</Text>
               </View> 
               <View style={styles.rightFeaturesSingleContainer}>
-                <Image source={{uri:emptySongAlbum}} style={{height:'8vh', width:'5vw', resizeMode:'contain'}}/>
+                <Image source={{uri:emptySongAlbum}} style={{minHeight:40, minWidth: 40, resizeMode:'contain'}}/>
                 <Text style={styles.rightFeaturesText}>BEATS</Text>
               </View> 
               <View style={styles.rightFeaturesSingleContainer}>
-                <Image source={{uri:emptySongAlbum}} style={{height:'8vh', width:'5vw', resizeMode:'contain'}}/>
+                <Image source={{uri:emptySongAlbum}} style={{minHeight:40, minWidth: 40, resizeMode:'contain'}}/>
                 <Text style={styles.rightFeaturesText}>BPM</Text>
               </View> 
               <View style={styles.rightFeaturesSingleContainer}>
-                <Image source={{uri:emptySongAlbum}} style={{height:'8vh', width:'5vw', resizeMode:'contain'}}/>
+                <Image source={{uri:emptySongAlbum}} style={{minHeight:40, minWidth: 40, resizeMode:'contain'}}/>
                 <Text style={styles.rightFeaturesText}>BARS</Text>
               </View>
               <View style={styles.rightFeaturesSingleContainer}>
-                <Image source={{uri:emptySongAlbum}} style={{height:'8vh', width:'5vw', resizeMode:'contain'}}/>
+                <Image source={{uri:emptySongAlbum}} style={{minHeight:40, minWidth: 40, resizeMode:'contain'}}/>
                 <Text style={styles.rightFeaturesText}>SEGMENTS</Text>
               </View>
             </View>
@@ -89,37 +109,37 @@ class Home extends React.Component<Props, any>{
         </View>
       );
     }
-    else if(this.state.infoType=='analysis'){
+    else if(infoType=='analysis'){
       return(
-        <View style={styles.rightSide}>
-            <Text style={styles.rightHeaderText}>ANALYZE</Text>
+        <View style={styles.analysisContainer}>
+          <Text style={styles.infoHeaderText}>ANALYZE</Text>
           <View style={{flexDirection:'row', justifyContent:'center'}}>
             <View style={{borderRadius:100, borderColor:'white', borderWidth:1, opacity:.5, backgroundColor:'#9C1EFF', height:'7vh',width:'7vh'}}/>
-            <Text style={styles.rightAnalysisText}>energy | <Text style={{fontSize:19, fontStyle: 'italic', color:'#A4A4A4'}}>intensity of a track</Text></Text>
+            <Text style={styles.rightAnalysisText}> energy | <Text style={{fontSize:19, fontStyle: 'italic', color:'#A4A4A4'}}>intensity of a track</Text></Text>
           </View>
           <View style={{flexDirection:'row', justifyContent:'center'}}>
             <View style={{borderRadius:100, borderColor:'white', borderWidth:1, opacity:.5, backgroundColor:'#3E3BD6', height:'7vh',width:'7vh'}}/>
-            <Text style={styles.rightAnalysisText}>valence | <Text style={{fontSize:19, fontStyle: 'italic', color:'#A4A4A4'}}>positivity of a track</Text></Text>
+            <Text style={styles.rightAnalysisText}> valence | <Text style={{fontSize:19, fontStyle: 'italic', color:'#A4A4A4'}}>positivity of a track</Text></Text>
           </View>
           <View style={{flexDirection:'row', justifyContent:'center'}}>
             <View style={{borderRadius:100, borderColor:'white', borderWidth:1, opacity:.5, backgroundColor:'#7280FF', height:'7vh',width:'7vh'}}/>
-            <Text style={styles.rightAnalysisText}>danceability | <Text style={{fontSize:19, fontStyle: 'italic', color:'#A4A4A4'}}>how suitable a track is for dancing</Text></Text>
+            <Text style={styles.rightAnalysisText}> danceability | <Text style={{fontSize:19, fontStyle: 'italic', color:'#A4A4A4'}}>how suitable a track is for dancing</Text></Text>
           </View>
           <View style={{flexDirection:'row', justifyContent:'center'}}>
             <View style={{borderRadius:100, borderColor:'white', borderWidth:1, opacity:.5, backgroundColor:'#5BCC96', height:'7vh',width:'7vh'}}/>
-            <Text style={styles.rightAnalysisText}>acousticness | <Text style={{fontSize:19, fontStyle: 'italic', color:'#A4A4A4'}}>how acoustic a track is</Text></Text>
+            <Text style={styles.rightAnalysisText}> acousticness | <Text style={{fontSize:19, fontStyle: 'italic', color:'#A4A4A4'}}>how acoustic a track is</Text></Text>
           </View>
           <View style={{flexDirection:'row', justifyContent:'center'}}>
             <View style={{borderRadius:100, borderColor:'white', borderWidth:1, opacity:.5, backgroundColor:'#FFE70F', height:'7vh',width:'7vh'}}/>
-            <Text style={styles.rightAnalysisText}>instrumentalness | <Text style={{fontSize:19, fontStyle: 'italic', color:'#A4A4A4'}}>presence of instruments rather than vocals</Text></Text>
+            <Text style={styles.rightAnalysisText}> instrumentalness | <Text style={{fontSize:19, fontStyle: 'italic', color:'#A4A4A4'}}>presence of instruments rather than vocals</Text></Text>
           </View>
           <View style={{flexDirection:'row', justifyContent:'center'}}>
             <View style={{borderRadius:100, borderColor:'white', borderWidth:1, opacity:.5, backgroundColor:'#FF7A00', height:'7vh',width:'7vh'}}/>
-            <Text style={styles.rightAnalysisText}>liveness | <Text style={{fontSize:19, fontStyle: 'italic', color:'#A4A4A4'}}>presence of audience in a track</Text></Text>
+            <Text style={styles.rightAnalysisText}> liveness | <Text style={{fontSize:19, fontStyle: 'italic', color:'#A4A4A4'}}>presence of audience in a track</Text></Text>
           </View>
           <View style={{flexDirection:'row', justifyContent:'center'}}>
             <View style={{borderRadius:100, borderColor:'white', borderWidth:1, opacity:.5, backgroundColor:'#FF0000', height:'7vh',width:'7vh'}}/>
-            <Text style={styles.rightAnalysisText}>speechiness | <Text style={{fontSize:19, fontStyle: 'italic', color:'#A4A4A4'}}>presence of spoken words in a track</Text></Text>
+            <Text style={styles.rightAnalysisText}> speechiness | <Text style={{fontSize:19, fontStyle: 'italic', color:'#A4A4A4'}}>presence of spoken words in a track</Text></Text>
           </View>
         </View>
       );
@@ -139,13 +159,7 @@ class Home extends React.Component<Props, any>{
               <Image source={{uri:linkedInLogo}} style={styles.linkImage}/>
             </TouchableOpacity>
           </View>
-          <View style={styles.headerOptions}>
-            <TouchableOpacity onPress={()=>{this.setState({infoType:'data'})}}><Text style = {styles.headerOptionsText}>audio data</Text></TouchableOpacity>
-            <TouchableOpacity onPress={()=>{this.setState({infoType:'features'})}}><Text style = {styles.headerOptionsText}>audio features</Text></TouchableOpacity>
-            <TouchableOpacity onPress={()=>{this.setState({infoType:'analysis'})}}><Text style = {styles.headerOptionsText}>audio analysis</Text></TouchableOpacity>
-          </View>
       </View>
-      <View style={{flexDirection:'row'}}>
         <LinearGradient  colors = {['#202020','#505050','#404040','#303030','#282727','#282727','black']} style={styles.playlist}>
           <LinearGradient colors = {['#9FFFC0', '#1DB954', '#2D6240']} style = {styles.backgroundImage}>
             <View style={styles.grayBar}/>
@@ -164,7 +178,7 @@ class Home extends React.Component<Props, any>{
           <Text style={styles.analysisText}>SPOTIFY PUBLIC PLAYLIST ANALYZER</Text>
           <Text style={styles.clickText}>CLICK THE PLAY BUTTON TO ANALYZE</Text>
           <Image source = {{uri:trackbar}} style={{alignSelf:'center', width:'100%', paddingVertical:'10%', resizeMode:'contain'}}/>
-          <View style={{flexDirection:'row', justifyContent:'space-between', paddingVertical:'6%'}}>
+          <View style={{flexDirection:'row', justifyContent:'space-between', paddingVertical:'4%'}}>
             <Image source = {{uri:skipIcon}} style={{alignSelf:'center', width:'20%', paddingVertical:'7%', resizeMode:'contain', tintColor:'white', transform:[{rotate:'180deg'}]}}/>
             <TouchableOpacity onPress={()=>this.props.navigation.navigate('Playlist Analysis', {playlistUri:this.state.uri})} style={{height:'12vh', width:'12vh', borderRadius:500, shadowColor:'white', shadowRadius:20, backgroundColor:'white'}}>
               <Image source = {{uri:playButton}} style={{alignSelf:'center', width:'12vh', height:'12vh', resizeMode:'cover', borderRadius:500, shadowColor:'white', shadowRadius:20, backgroundColor:'white'}}/>
@@ -172,22 +186,25 @@ class Home extends React.Component<Props, any>{
             <Image source = {{uri:skipIcon}} style={{alignSelf:'center', width:'20%', paddingVertical:'7%', resizeMode:'contain', tintColor:'white'}}/>
           </View>
         </LinearGradient>
-          {this.renderInfo()}
-      </View>
+        <BrowserView>
+          <View style={{flexDirection:'row', justifyContent:'space-evenly', paddingBottom:'3%',paddingTop:'1vh'}}>
+            {this.renderInfo('data')}
+            {this.renderInfo('analysis')}
+            {this.renderInfo('features')}
+          </View>
+        </BrowserView>
+        <MobileView>
+          <View style={{flexDirection:'column', justifyContent:'space-evenly', paddingBottom:'3%',paddingTop:'1vh'}}>
+            {this.renderInfo('data')}
+            {this.renderInfo('analysis')}
+            {this.renderInfo('features')}
+          </View>
+        </MobileView>
     </LinearGradient>
   )}
 }
 
 const styles = StyleSheet.create({
-  rightAnalysisText:{
-    fontFamily:'Segoe UI',
-    color:'white',
-    fontSize:22,
-    borderRadius:50,
-    padding:'1%',
-    width:'57%',
-    alignSelf:'center',
-  },
   rightFeaturesSingleContainer:{
     flexDirection:'row',
     marginVertical:'3vh',
@@ -195,39 +212,65 @@ const styles = StyleSheet.create({
   rightFeaturesText:{
     fontFamily:'Segoe UI',
     color:'white',
-    fontSize:25,
-    letterSpacing:1
+    fontSize:22,
+    letterSpacing:1,
+    paddingHorizontal:'2%'
   },
-  rightHeaderText:{
+  infoHeaderText:{
     textAlign:'center',
     fontFamily:'Segoe UI',
     color:'white',
     fontSize:30,
     fontWeight:'600',
-    letterSpacing:1
+    letterSpacing:1,
+    borderColor:'white',
+    borderBottomWidth:1,
+    borderTopWidth:1,
+    marginTop:'1vh',
+    paddingHorizontal:'2vw'
   },
   rightDataText:{
-    textAlign:'center',
+    fontFamily:'Segoe UI',
+    color:'white',
+    fontSize:22,
+    padding:'1%',
+    width:'15vh',
+    alignSelf:'center',
+    letterSpacing:1
+  },
+  rightData:{
+    justifyContent:'center',
+    flexDirection:'row',
+    // marginTop:'-2%',
+  },
+  featureContainer:{
+    flexDirection:'column',
+    justifyContent:'space-between',
+    // width:'33%',
+  },
+  dataContainer:{
+    flexDirection:'column',
+    justifyContent:'space-between',
+    paddingBottom:'1%',
+    // width:'15%',
+  },
+  analysisContainer:{
+    flexDirection:'column',
+    justifyContent:'space-between',
+    // width:'40%',
+    // minWidth:'40%',
+  },
+  rightAnalysisText:{
     fontFamily:'Segoe UI',
     color:'white',
     fontSize:22,
     borderRadius:50,
-    padding:'1%',
-    borderWidth:1,
-    borderColor:'white',
-    width:'20%',
+    // paddingLeft:'1%',
+    // padding:'1%',
+    // width:'57%',
+    flex:1,
+    flexDirection:'row',
     alignSelf:'center',
-    marginTop:'-2%'
-  },
-  rightSide:{
-    flexDirection:'column',
-    justifyContent:'space-evenly',
-    width:'64%',
-  },
-  rightSideFeature:{
-    flexDirection:'column',
-    justifyContent:'space-evenly',
-    width:'64vw',
   },
   analysisText:{
     fontFamily:'Segoe UI',  // Gotten from Index
@@ -269,11 +312,16 @@ const styles = StyleSheet.create({
   },
   playlist:{
     flexDirection:'column',
-    width:'36%',
-    height:'91vh',
-    marginTop:'1vh',
+    // width:'36vw',
+    maxWidth:'36vw',
+    minWidth: 375,
+    minHeight:500,
+    height:'93vh',
+    marginTop:'2vh',
     padding:'2%',
-    paddingBottom:'1%'
+    paddingBottom:'1%',
+    // marginLeft:'32vw',
+    alignSelf:'center'
   },
   backgroundImage:{
     resizeMode:'stretch',
@@ -287,6 +335,8 @@ const styles = StyleSheet.create({
     justifyContent:'space-between',
     width:'100%',
     marginTop:'1%',
+    zIndex:10,
+    position:'absolute'
   },
   headerLinks:{
     flexDirection:'row',

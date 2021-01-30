@@ -3,19 +3,19 @@ import { View } from 'react-native';
 
 interface Props{
   start: {
-    x: 0.5,
-    y: 0,
+    x: number,
+    y: number,
   },
   end: {
-    x: 0.5,
-    y: 1,
+    x: number,
+    y: number,
   },
   locations: [],
   colors: String[],
   useAngle: false,
-  angle: 0,
+  angle: number,
   style:any,
-  angleCenter:0.5,
+  angleCenter:number,
 }
 
 export default class LinearGradient extends PureComponent<Props, any>{
