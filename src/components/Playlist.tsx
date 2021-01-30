@@ -4,6 +4,7 @@ import axios from 'axios';
 import AxiosGetPlaylist from '../requests/AxiosGetPlaylist';
 import AxiosGetToken from '../requests/AxiosGetToken';
 import LinearGradient from '../assets/Features/LinearGradient';
+import { BrowserView, MobileView, isMobile } from "react-device-detect";
 
 interface Props{
   navigation:any,
@@ -717,8 +718,8 @@ const styles = StyleSheet.create({
     position:'absolute',
     marginLeft:'9%',
     backgroundColor: '#282727',
-    marginTop:'5%',
-    width:'20%',
+    marginTop:(isMobile? '50%':'5%'),
+    width:(isMobile? '80%':'20%'),
     padding:'1%',
   },
   filterSpecInputContainer:{
@@ -726,8 +727,8 @@ const styles = StyleSheet.create({
     position:'absolute',
     marginLeft:'13%',
     backgroundColor: '#282727',
-    marginTop:'2%',
-    width:'12%',
+    marginTop:(isMobile? '50%':'2%'),
+    width:(isMobile? '50%':'12%'),
     padding: '1%'
   },
   threeKeyContainer:{
@@ -785,7 +786,7 @@ const styles = StyleSheet.create({
     textShadowColor:'white',
     textShadowRadius:1,
     fontWeight:'600',
-    fontSize:14,
+    fontSize:(isMobile? 9:14),
     letterSpacing:1,
     paddingRight: '1%'
   },
@@ -800,7 +801,7 @@ const styles = StyleSheet.create({
   },
   navText: {
     color:'black',
-    fontSize:14,
+    fontSize:(isMobile? 12:14),
     textAlign:'center',
     fontFamily: 'Segoe UI',
   },
@@ -813,7 +814,7 @@ const styles = StyleSheet.create({
   optionsButton: {
     padding:5,
     backgroundColor:'#e5e5e5',
-    width:90,
+    width:(isMobile? 60:90),
     borderRadius:20,
     fontFamily: 'Segoe UI',
   },
@@ -844,7 +845,7 @@ const styles = StyleSheet.create({
   },
   barText: {
     color:'white',
-    fontSize:18,
+    fontSize:(isMobile? 9:18),
     fontWeight: '700',
     textShadowColor:'white',
     textShadowRadius:1,
@@ -852,7 +853,7 @@ const styles = StyleSheet.create({
   },
   barTextArtist: {
     color:'white',
-    fontSize:18,
+    fontSize:(isMobile? 9:18),
     fontWeight: '700',
     flex: 1,
     textShadowColor:'white',
@@ -861,7 +862,8 @@ const styles = StyleSheet.create({
   },
   songList: {
     width:'95%',
-    height: 110,
+    overflow:'hidden',
+    height: (isMobile? 60:110),
     padding:10,
     borderBottomWidth:1,
     borderBottomColor:'white',
@@ -892,7 +894,7 @@ const styles = StyleSheet.create({
   },
   songTextArtist: {
     color:'white',
-    fontSize:16,
+    fontSize:(isMobile? 9:16),
     fontFamily:'Segoe UI',
     textShadowColor:'black',
     textShadowRadius:4,
@@ -902,7 +904,7 @@ const styles = StyleSheet.create({
   },
   songTextAlbum: {
     color:'white',
-    fontSize:16,
+    fontSize:(isMobile? 9:16),
     fontFamily:'Segoe UI',
     textShadowColor:'black',
     textShadowRadius:4,
@@ -911,7 +913,7 @@ const styles = StyleSheet.create({
   },
   songText: {
     color:'white',
-    fontSize:16,
+    fontSize:(isMobile? 9:16),
     fontFamily:'Segoe UI',
     textShadowColor:'black',
     textShadowRadius:4,
@@ -920,7 +922,7 @@ const styles = StyleSheet.create({
   },
   songTextTrack: {
     color:'white',
-    fontSize:16,
+    fontSize:(isMobile? 9:16),
     fontFamily:'Segoe UI',
     textShadowColor:'black',
     textShadowRadius:4,
@@ -946,7 +948,7 @@ const styles = StyleSheet.create({
     minWidth:'100%',
   },
   headerContainer:{
-    flexDirection: 'row',
+    flexDirection: (isMobile? 'column':'row'),
     width: '95%',
     alignSelf: 'center',
     justifyContent: 'space-between',
@@ -972,11 +974,11 @@ const styles = StyleSheet.create({
     alignSelf: 'center'
   },
   playlistContainer:{
-    flexDirection: 'row',
+    flexDirection: (isMobile? 'column':'row'),
   },
   playArtContainer:{
-    width:'30vh',
-    height:'30vh',
+    width:(isMobile? 200:'30vh'),
+    height:(isMobile? 200:'30vh'),
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -989,7 +991,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     flexDirection: 'column',
     marginLeft: 10,
-    width: '100%'
+    width: '100%',
+    paddingBottom:(isMobile? '3%':'0%')
   },
   playlistName:{
     color: 'white',
@@ -1017,6 +1020,7 @@ const styles = StyleSheet.create({
     textShadowRadius:4,
     textShadowOffset:{width:2,height:2},
     width: '90%',
+    marginVertical:'3%',
   },
   trackAmount:{
     color: 'white',

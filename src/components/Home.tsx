@@ -9,7 +9,7 @@ import emptySongAlbum from '../assets/images/emptySongAlbum.jpg';
 import linkedInLogo from '../assets/images/linkedinLogo.png';
 import LinearGradient from '../assets/Features/LinearGradient';
 import CheckMark from '../assets/images/Checkmark.png';
-import { BrowserView, MobileView } from "react-device-detect";
+import { BrowserView, MobileView, isMobile } from "react-device-detect";
 
 interface Props{
   navigation:any
@@ -19,13 +19,13 @@ class Home extends React.Component<Props, any>{
   constructor(props: Props | Readonly<Props>) {
     super(props)
     this.state = {
-      // infoType:'data',
+      infoType:'data',
       uri: '0fCpH2h614ebCnRW4Wmy9L',
     };
   }
   
-  renderInfo=(infoType:any)=>{
-    if(infoType=='data'){
+  renderInfo=()=>{
+    if(this.state.infoType=='data'){
       return(
           <View style={styles.dataContainer}>
             <Text style={styles.infoHeaderText}>SORT BY</Text>
@@ -56,7 +56,7 @@ class Home extends React.Component<Props, any>{
           </View>
       );
     }
-    else if(infoType=='features'){
+    else if(this.state.infoType=='features'){
       return(
         <View style={styles.featureContainer}>
           <Text style={styles.infoHeaderText}>FIND THE</Text>
@@ -109,7 +109,7 @@ class Home extends React.Component<Props, any>{
         </View>
       );
     }
-    else if(infoType=='analysis'){
+    else if(this.state.infoType=='analysis'){
       return(
         <View style={styles.analysisContainer}>
           <Text style={styles.infoHeaderText}>ANALYZE</Text>
@@ -149,57 +149,76 @@ class Home extends React.Component<Props, any>{
   render(){return(
     <LinearGradient  colors = {['#353535', '#494949','#252525']} style={{ minHeight:'100vh'}}>
       <View style={styles.header}>
-          <View style={styles.headerLinks}>
-            <Text style={styles.headerLinkText}>Developer:</Text>
-            <TouchableOpacity style={{marginLeft:'2%', shadowColor:'white', shadowRadius:10, borderRadius:500,}} onPress={()=>{window.open('https://www.linkedin.com/in/jackson-kim-480949191/','_blank')}}>
-              <Image source={{uri:linkedInLogo}} style={styles.linkImage}/>
-            </TouchableOpacity>
-            <Text style={styles.headerLinkText}>Designer:</Text>
-            <TouchableOpacity style={{marginLeft:'2%', shadowColor:'white', shadowRadius:10, borderRadius:500,}} onPress={()=>{window.open('https://www.linkedin.com/in/danphuong-hoang-0baa58138/','_blank')}}>
-              <Image source={{uri:linkedInLogo}} style={styles.linkImage}/>
-            </TouchableOpacity>
-          </View>
+          <Text style={styles.analysisText}>SPOTIFY PUBLIC PLAYLIST ANALYZER</Text>
+          <BrowserView>
+            <View style={styles.headerLinks}>
+              <Text style={styles.headerLinkText}>Developer:</Text>
+              <TouchableOpacity style={{marginLeft:'2%', shadowColor:'white', shadowRadius:10, borderRadius:500, height:35, width:35,marginHorizontal:'10%'}} onPress={()=>{window.open('https://www.linkedin.com/in/jackson-kim-480949191/','_blank')}}>
+                <Image source={{uri:linkedInLogo}} style={styles.linkImage}/>
+              </TouchableOpacity>
+              <Text style={styles.headerLinkText}>Designer:</Text>
+              <TouchableOpacity style={{marginLeft:'2%', shadowColor:'white', shadowRadius:10, borderRadius:500, height:35, width:35,marginHorizontal:'10%'}} onPress={()=>{window.open('https://www.linkedin.com/in/danphuong-hoang-0baa58138/','_blank')}}>
+                <Image source={{uri:linkedInLogo}} style={styles.linkImage}/>
+              </TouchableOpacity>
+            </View>
+          </BrowserView>
+          <MobileView>
+            <View style={{flexDirection:'column', flex:1}}>
+              <Text style={styles.headerLinkText}>Developer:</Text>
+              <TouchableOpacity style={{marginLeft:'2%', shadowColor:'white', shadowRadius:10, borderRadius:500, height:35, width:35}} onPress={()=>{window.open('https://www.linkedin.com/in/jackson-kim-480949191/','_blank')}}>
+                <Image source={{uri:linkedInLogo}} style={styles.linkImage}/>
+              </TouchableOpacity>
+              <Text style={styles.headerLinkText}>Designer:</Text>
+              <TouchableOpacity style={{marginLeft:'2%', shadowColor:'white', shadowRadius:10, borderRadius:500, height:35, width:35}} onPress={()=>{window.open('https://www.linkedin.com/in/danphuong-hoang-0baa58138/','_blank')}}>
+                <Image source={{uri:linkedInLogo}} style={styles.linkImage}/>
+              </TouchableOpacity>
+            </View>
+          </MobileView>
       </View>
-        <LinearGradient  colors = {['#202020','#505050','#404040','#303030','#282727','#282727','black']} style={styles.playlist}>
-          <LinearGradient colors = {['#9FFFC0', '#1DB954', '#2D6240']} style = {styles.backgroundImage}>
+        <LinearGradient  colors = {['black','#505050','#404040','#282727','#282727','#282727','#191919','#191919','black']} style={styles.playlist}>
+          <LinearGradient colors = {['#2D6240','#9FFFC0','#1DB954']} style = {styles.backgroundImage}>
             <View style={styles.grayBar}/>
             <TextInput
               style={styles.inputUri}
               placeholder={"Copy and Paste Playlist Link of Public Spotify Playlist"}
               allowFontScaling={true}
-              placeholderTextColor='#5F5454'
+              placeholderTextColor='white'
               onChangeText={inputUri=>{
                 inputUri = inputUri.replace('https://open.spotify.com/playlist/', '');
                 inputUri = inputUri.slice(0,22);
                 this.setState({uri:inputUri});
                 }}/>
             <View style={styles.grayBar}/>
-            </LinearGradient>
-          <Text style={styles.analysisText}>SPOTIFY PUBLIC PLAYLIST ANALYZER</Text>
-          <Text style={styles.clickText}>CLICK THE PLAY BUTTON TO ANALYZE</Text>
-          <Image source = {{uri:trackbar}} style={{alignSelf:'center', width:'100%', paddingVertical:'10%', resizeMode:'contain'}}/>
-          <View style={{flexDirection:'row', justifyContent:'space-between', paddingVertical:'4%'}}>
-            <Image source = {{uri:skipIcon}} style={{alignSelf:'center', width:'20%', paddingVertical:'7%', resizeMode:'contain', tintColor:'white', transform:[{rotate:'180deg'}]}}/>
-            <TouchableOpacity onPress={()=>this.props.navigation.navigate('Playlist Analysis', {playlistUri:this.state.uri})} style={{height:'12vh', width:'12vh', borderRadius:500, shadowColor:'white', shadowRadius:20, backgroundColor:'white'}}>
-              <Image source = {{uri:playButton}} style={{alignSelf:'center', width:'12vh', height:'12vh', resizeMode:'cover', borderRadius:500, shadowColor:'white', shadowRadius:20, backgroundColor:'white'}}/>
-            </TouchableOpacity>
-            <Image source = {{uri:skipIcon}} style={{alignSelf:'center', width:'20%', paddingVertical:'7%', resizeMode:'contain', tintColor:'white'}}/>
+          </LinearGradient>
+          <View style={{alignSelf:'center', width:'40%', minWidth: 300,}}>
+            <Text style={styles.clickText}>CLICK THE PLAY BUTTON TO ANALYZE</Text>
+            <Image source = {{uri:trackbar}} style={{alignSelf: 'flex-start', width:'100%', paddingVertical:'3vh', resizeMode:'contain'}}/>
+            <View style={{flexDirection:'row', justifyContent:'space-evenly', paddingVertical:'2vh'}}>
+              <Image source = {{uri:skipIcon}} style={{alignSelf:'center', width:'20vw', paddingVertical:'5vh', resizeMode:'contain', tintColor:'white', transform:[{rotate:'180deg'}]}}/>
+              <TouchableOpacity onPress={()=>this.props.navigation.navigate('Playlist Analysis', {playlistUri:this.state.uri})} style={{height:'12vh', width:'12vh', borderRadius:500, shadowColor:'white', shadowRadius:20, backgroundColor:'white'}}>
+                <Image source = {{uri:playButton}} style={{alignSelf:'center', width:'12vh', height:'12vh', resizeMode:'cover', borderRadius:500, shadowColor:'white', shadowRadius:20, backgroundColor:'white'}}/>
+              </TouchableOpacity>
+              <Image source = {{uri:skipIcon}} style={{alignSelf:'center', width:'20vw', paddingVertical:'5vh', resizeMode:'contain', tintColor:'white'}}/>
+            </View>
+          </View>
+          <BrowserView>
+            <View style={styles.headerOptions}>
+              <TouchableOpacity onPress={()=>{this.setState({infoType:'data'})}}><Text style = {styles.headerOptionsText}>audio data</Text></TouchableOpacity>
+              <TouchableOpacity onPress={()=>{this.setState({infoType:'features'})}}><Text style = {styles.headerOptionsText}>audio features</Text></TouchableOpacity>
+              <TouchableOpacity onPress={()=>{this.setState({infoType:'analysis'})}}><Text style = {styles.headerOptionsText}>audio analysis</Text></TouchableOpacity>
+            </View>
+          </BrowserView>
+          <MobileView>
+            <View style={styles.headerOptionsMobile}>
+              <TouchableOpacity onPress={()=>{this.setState({infoType:'data'})}}><Text style = {styles.headerOptionsText}>audio data</Text></TouchableOpacity>
+              <TouchableOpacity onPress={()=>{this.setState({infoType:'features'})}}><Text style = {styles.headerOptionsText}>audio features</Text></TouchableOpacity>
+              <TouchableOpacity onPress={()=>{this.setState({infoType:'analysis'})}}><Text style = {styles.headerOptionsText}>audio analysis</Text></TouchableOpacity>
+            </View>
+          </MobileView>
+          <View style={{flexDirection:'row', justifyContent:'space-evenly', paddingBottom:'3%',paddingTop:'1vh'}}>
+            {this.renderInfo()}
           </View>
         </LinearGradient>
-        <BrowserView>
-          <View style={{flexDirection:'row', justifyContent:'space-evenly', paddingBottom:'3%',paddingTop:'1vh'}}>
-            {this.renderInfo('data')}
-            {this.renderInfo('analysis')}
-            {this.renderInfo('features')}
-          </View>
-        </BrowserView>
-        <MobileView>
-          <View style={{flexDirection:'column', justifyContent:'space-evenly', paddingBottom:'3%',paddingTop:'1vh'}}>
-            {this.renderInfo('data')}
-            {this.renderInfo('analysis')}
-            {this.renderInfo('features')}
-          </View>
-        </MobileView>
     </LinearGradient>
   )}
 }
@@ -225,16 +244,17 @@ const styles = StyleSheet.create({
     letterSpacing:1,
     borderColor:'white',
     borderBottomWidth:1,
-    borderTopWidth:1,
+    // borderTopWidth:1,
     marginTop:'1vh',
-    paddingHorizontal:'2vw'
+    // paddingHorizontal:'2vw'
   },
   rightDataText:{
     fontFamily:'Segoe UI',
     color:'white',
     fontSize:22,
     padding:'1%',
-    width:'15vh',
+    width:'10vw',
+    minWidth:100,
     alignSelf:'center',
     letterSpacing:1
   },
@@ -246,19 +266,21 @@ const styles = StyleSheet.create({
   featureContainer:{
     flexDirection:'column',
     justifyContent:'space-between',
-    // width:'33%',
+    width:'80%',
+    minHeight:'60vh',
   },
   dataContainer:{
     flexDirection:'column',
     justifyContent:'space-between',
-    paddingBottom:'1%',
-    // width:'15%',
+    // paddingBottom:'1%',
+    width:'80%',
+    minHeight:'60vh',
   },
   analysisContainer:{
     flexDirection:'column',
     justifyContent:'space-between',
-    // width:'40%',
-    // minWidth:'40%',
+    width:'80%',
+    minHeight:'60vh',
   },
   rightAnalysisText:{
     fontFamily:'Segoe UI',
@@ -276,9 +298,11 @@ const styles = StyleSheet.create({
     fontFamily:'Segoe UI',  // Gotten from Index
     color:'white',
     fontSize: 25,
-    marginTop:'2%',
+    // marginTop:'2%',
     fontWeight:'700',
-    letterSpacing:1
+    letterSpacing:1,
+    // paddingLeft: '2%',
+    flex:1,
   },
   sortText:{
     fontFamily:'Segoe UI',
@@ -288,59 +312,72 @@ const styles = StyleSheet.create({
   },
   clickText:{
     fontFamily:'Segoe UI',
-    color:'#A4A4A4',
-    fontSize: 22,
+    color:'white',
+    fontSize: (isMobile? 20:25),
     marginVertical:'2%',
-    fontWeight:'500'
+    fontWeight:'500',
+    // alignSelf:'center',
   },
   grayBar:{
     backgroundColor:'#353535',
-    height:'15%',
-    marginHorizontal:'8%',
+    height:'10%',
+    width:'80%',
+    marginHorizontal:'10%',
     borderRadius:50,
+    zIndex:1,
+    marginLeft:'-2%',
   },
   inputUri:{
-    backgroundColor:'white',
+    backgroundColor:'#353535',
     borderRadius:50,
     textAlign:'center',
     textAlignVertical:'center',
     height:'15%',
     marginHorizontal:'3%',
-    shadowColor:'black',
-    shadowRadius:10,
-    shadowOffset:{width: 5,height:6}
+    borderColor:'white',
+    borderWidth:3,
+    // shadowColor:'black',
+    // shadowRadius:10,
+    // shadowOffset:{width: 5,height:6}
   },
   playlist:{
     flexDirection:'column',
     // width:'36vw',
-    maxWidth:'36vw',
-    minWidth: 375,
-    minHeight:500,
-    height:'93vh',
+    width:'80vw',
+    minWidth: 370,
+    // minHeight:500,
+    // height:'93vh',
     marginTop:'2vh',
     padding:'2%',
     paddingBottom:'1%',
     // marginLeft:'32vw',
-    alignSelf:'center'
+    alignSelf:'center',
+    position:'relative',
   },
   backgroundImage:{
-    resizeMode:'stretch',
-    height:'40vh',
-    width:'100%',
+    // resizeMode:'stretch',
+    height:'26vw',
+    width:'26vw',
+    minHeight:270,
+    minWidth:270,
     alignSelf:'center',
     justifyContent: 'space-evenly',
+    borderRadius:500,
   },
   header:{
     flexDirection:'row',
-    justifyContent:'space-between',
-    width:'100%',
+    justifyContent:'space-evenly',
+    width:'90%',
     marginTop:'1%',
-    zIndex:10,
-    position:'absolute'
+    flex:1,
+    alignSelf:'center',
+    // zIndex:10,
+    // position:'absolute'
   },
   headerLinks:{
     flexDirection:'row',
-    width:'36%',
+    flex:1,
+    // width:'36%',
   },
   headerLinkText:{
     fontFamily:'Segoe UI',
@@ -349,11 +386,12 @@ const styles = StyleSheet.create({
     textShadowRadius:1,
     fontSize: 15,
     letterSpacing:1,
-    marginLeft:'7%'
+    // marginLeft:'%',
+    // flex:1
   },
   linkImage:{
-    height:'4vh',
-    width:'4vh',
+    height:35,
+    width:35,
     resizeMode:'cover',
     accessible:false,
     alignSelf:'center',
@@ -361,15 +399,34 @@ const styles = StyleSheet.create({
   },
   headerOptions:{
     flexDirection:'row',
+    flex:1,
     justifyContent:'space-evenly',
-    width:'62%',
-    marginLeft:'2vh',
+    width:'100%',
+    // marginLeft:'2vh',
+    marginVertical:'2vh',
+    paddingVertical:'2vh',
+    borderColor:'white',
+    borderWidth:1,
+    alignSelf:'center',
+  },
+  headerOptionsMobile:{
+    flexDirection:'column',
+    flex:1,
+    justifyContent:'space-evenly',
+    textAlign:'center',
+    width:'100%',
+    alignSelf:'center',
+    // marginLeft:'2vh',
+    marginVertical:'2vh',
+    paddingVertical:'2vh',
+    borderColor:'white',
+    borderWidth:1,
   },
   headerOptionsText:{
     fontFamily:'Segoe UI',
     color:'white',
     textShadowColor:'white',
-    textShadowRadius:6,
+    textShadowRadius:14,
     fontSize: 20,
     letterSpacing:1,
   },
