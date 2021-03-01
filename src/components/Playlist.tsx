@@ -82,14 +82,25 @@ class PlaylistItems extends React.Component<Props, any>{
           this.setState({
             errorStatus:true,
           })
+          console.log(err.response);
           return err.response;
       });
       // New Stuff
       this.setState({
-        trackIds: playlist.tracks.items.map((track:any)=>{
+        trackIds: playlist.tracks.items.filter((track:any)=> {  // Use filter since spotify takes down songs that are already in a playlist...
+          if(track.track.name == ""){
+            return false;
+          }
+          return true;
+        }).map((track:any)=>{
           return(track.track.id);
         }),
-        TrackSimple: playlist.tracks.items.map((track:any)=>{
+        TrackSimple: playlist.tracks.items.filter((track:any)=> {
+          if(track.track.name == ""){
+            return false;
+          }
+          return true;
+        }).map((track:any)=>{
           let minutes = Math.floor(track.track.duration_ms/60000);
           let seconds = Math.round((track.track.duration_ms - (60000*minutes))/1000);
           let dur = `${minutes}:${seconds}`;
@@ -129,6 +140,7 @@ class PlaylistItems extends React.Component<Props, any>{
             return response.data;
         })
         .catch(err =>{
+            console.log(err.response);
             return err.response;
         });
       /* features.audio_features */
@@ -155,7 +167,6 @@ class PlaylistItems extends React.Component<Props, any>{
           });
         })
       })
-      //start of even newer stuff
       let iterations = Math.floor(this.state.TrackAmount/100);
       for(var i = 0; i<iterations; i++){
         /* Get all the tracks from the playlist */
@@ -177,10 +188,20 @@ class PlaylistItems extends React.Component<Props, any>{
         });
         // New Stuff
         this.setState({
-          trackIds: newPlaylist.items.map((track:any)=>{
+          trackIds: newPlaylist.items.filter((track:any)=> {
+            if(track.track.name == ""){
+              return false;
+            }
+            return true;
+          }).map((track:any)=>{
             return(track.track.id);
           }),
-          TrackSimple: this.state.TrackSimple.concat(newPlaylist.items.map((track:any)=>{
+          TrackSimple: this.state.TrackSimple.concat(newPlaylist.items.filter((track:any)=> {
+            if(track.track.name == ""){
+              return false;
+            }
+            return true;
+          }).map((track:any)=>{
             let minutes = Math.floor(track.track.duration_ms/60000);
             let seconds = Math.round((track.track.duration_ms - (60000*minutes))/1000);
             let dur = `${minutes}:${seconds}`;

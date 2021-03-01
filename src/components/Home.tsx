@@ -20,7 +20,7 @@ class Home extends React.Component<Props, any>{
     super(props)
     this.state = {
       infoType:'data',
-      uri: '0fCpH2h614ebCnRW4Wmy9L',
+      uri: '37i9dQZF1DWSP55jZj2ES3',
     };
   }
   
