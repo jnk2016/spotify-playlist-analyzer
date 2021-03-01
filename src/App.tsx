@@ -36,7 +36,7 @@ function App() {
           options={{
             headerBackImage: ()=>(
             <Hoverable>
-            {({hovered})=>( <Image source={{uri:goback}} style={{height:60, width:60, resizeMode:'contain'}}/>
+            {({hovered})=>( <Image source={{uri:goback}} style={{height:60, width:60, resizeMode:'contain', opacity:(hovered?.5:1)}}/>
             )}
             </Hoverable>
             ),
