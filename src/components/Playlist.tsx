@@ -5,6 +5,7 @@ import AxiosGetPlaylist from '../requests/AxiosGetPlaylist';
 import AxiosGetToken from '../requests/AxiosGetToken';
 import LinearGradient from '../assets/Features/LinearGradient';
 import { BrowserView, MobileView, isMobile } from "react-device-detect";
+import {Hoverable} from 'react-native-web-hover';
 
 interface Props{
   navigation:any,
@@ -285,7 +286,8 @@ class PlaylistItems extends React.Component<Props, any>{
 
         BasicInfo: this.state.TrackDetails.map((song:any, i:any) => {
           return(
-          <TouchableOpacity style={styles.songList} onPress={()=>{
+          <Hoverable>
+          {({hovered})=>(<TouchableOpacity style={{  width:'95%',  overflow:'hidden', opacity: (hovered?.5:1), height: (isMobile? 60:110),  padding:10,  borderBottomWidth:1,  borderBottomColor:'white',  flexDirection:'row',  alignSelf:'center',  justifyContent:'space-between'}} onPress={()=>{
               this.props.navigation.navigate('Song Analysis', {
                 token: this.state.AuthToken,
                 songID:song.id,
@@ -325,7 +327,8 @@ class PlaylistItems extends React.Component<Props, any>{
                 <Text style={styles.songText}>{song.bpm}</Text>
                 <Text style={styles.songText}>{song.timeSig}</Text>
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity>)}
+          </Hoverable>
         )})
 
       });

@@ -10,6 +10,7 @@ import linkedInLogo from '../assets/images/linkedinLogo.png';
 import LinearGradient from '../assets/Features/LinearGradient';
 import CheckMark from '../assets/images/Checkmark.png';
 import { BrowserView, MobileView, isMobile } from "react-device-detect";
+import {Hoverable} from 'react-native-web-hover';
 
 interface Props{
   navigation:any
@@ -195,9 +196,11 @@ class Home extends React.Component<Props, any>{
             <Image source = {{uri:trackbar}} style={{alignSelf: 'flex-start', width:'100%', paddingVertical:'3vh', resizeMode:'contain'}}/>
             <View style={{flexDirection:'row', justifyContent:'space-evenly', paddingVertical:'2vh'}}>
               <Image source = {{uri:skipIcon}} style={{alignSelf:'center', width:'20vw', paddingVertical:'5vh', resizeMode:'contain', tintColor:'white', transform:[{rotate:'180deg'}]}}/>
-              <TouchableOpacity onPress={()=>this.props.navigation.navigate('Playlist Analysis', {playlistUri:this.state.uri})} style={{height:'12vh', width:'12vh', borderRadius:500, shadowColor:'white', shadowRadius:20, backgroundColor:'white'}}>
-                <Image source = {{uri:playButton}} style={{alignSelf:'center', width:'12vh', height:'12vh', resizeMode:'cover', borderRadius:500, shadowColor:'white', shadowRadius:20, backgroundColor:'white'}}/>
-              </TouchableOpacity>
+              <Hoverable>
+              {({hovered}) => (<TouchableOpacity onPress={()=>this.props.navigation.navigate('Playlist Analysis', {playlistUri:this.state.uri})} style={{height:'12vh', width:'12vh', borderRadius: 500, shadowColor:'white', shadowRadius:(hovered?20:5), backgroundColor:'white'}}>
+                <Image source = {{uri:playButton}} style={{alignSelf:'center', width:'12vh', height:'12vh', resizeMode:'cover', borderRadius:500, shadowColor:'white', shadowRadius:(hovered?20:5), backgroundColor:'white'}}/>
+              </TouchableOpacity>)}
+              </Hoverable>
               <Image source = {{uri:skipIcon}} style={{alignSelf:'center', width:'20vw', paddingVertical:'5vh', resizeMode:'contain', tintColor:'white'}}/>
             </View>
           </View>

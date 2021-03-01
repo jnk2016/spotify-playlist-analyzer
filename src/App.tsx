@@ -8,6 +8,7 @@ import Playlist from './components/Playlist';
 import Song from './components/Song';
 import spotifylogo from './assets/images/spotifylogo.png';
 import goback from './assets/images/goback.png'
+import {Hoverable} from 'react-native-web-hover';
 
 function App() {
   const config = {
@@ -33,7 +34,12 @@ function App() {
       <Stack.Navigator initialRouteName={'Spotify Public Playlist Analyzer'}>
         <Stack.Screen name='Song Analysis' component={Song} 
           options={{
-            headerBackImage: ()=>(<Image source={{uri:goback}} style={{height:60, width:60, resizeMode:'contain'}}/>),
+            headerBackImage: ()=>(
+            <Hoverable>
+            {({hovered})=>( <Image source={{uri:goback}} style={{height:60, width:60, resizeMode:'contain'}}/>
+            )}
+            </Hoverable>
+            ),
             headerShown: true, 
             headerBackTitle:'Back',
             headerStyle: {
@@ -52,7 +58,12 @@ function App() {
           }}/>
         <Stack.Screen name='Playlist Analysis' component={Playlist}
           options={{
-            headerBackImage: ()=>(<Image source={{uri:spotifylogo}} style={{height:50, width:50, resizeMode:'contain'}}/>),
+            headerBackImage: ()=>(
+            <Hoverable>
+            {({hovered})=>( <Image source={{uri:spotifylogo}} style={{height:50, width:50, resizeMode:'contain', opacity:(hovered?.5:1)}}/>
+            )}
+            </Hoverable>
+            ),
             headerShown: true, 
             headerBackTitle:'Back',
             headerStyle: {
