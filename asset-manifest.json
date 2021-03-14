@@ -1,25 +1,25 @@
 {
   "files": {
     "main.css": "/spotify-playlist-analyzer/static/css/main.8c8b27cf.chunk.css",
-    "main.js": "/spotify-playlist-analyzer/static/js/main.71517af1.chunk.js",
-    "main.js.map": "/spotify-playlist-analyzer/static/js/main.71517af1.chunk.js.map",
-    "runtime-main.js": "/spotify-playlist-analyzer/static/js/runtime-main.abfc5f79.js",
-    "runtime-main.js.map": "/spotify-playlist-analyzer/static/js/runtime-main.abfc5f79.js.map",
-    "static/js/2.fae844c9.chunk.js": "/spotify-playlist-analyzer/static/js/2.fae844c9.chunk.js",
-    "static/js/2.fae844c9.chunk.js.map": "/spotify-playlist-analyzer/static/js/2.fae844c9.chunk.js.map",
-    "static/js/3.5665c01d.chunk.js": "/spotify-playlist-analyzer/static/js/3.5665c01d.chunk.js",
-    "static/js/3.5665c01d.chunk.js.map": "/spotify-playlist-analyzer/static/js/3.5665c01d.chunk.js.map",
+    "main.js": "/spotify-playlist-analyzer/static/js/main.92e79334.chunk.js",
+    "main.js.map": "/spotify-playlist-analyzer/static/js/main.92e79334.chunk.js.map",
+    "runtime-main.js": "/spotify-playlist-analyzer/static/js/runtime-main.4777b651.js",
+    "runtime-main.js.map": "/spotify-playlist-analyzer/static/js/runtime-main.4777b651.js.map",
+    "static/js/2.f204c65c.chunk.js": "/spotify-playlist-analyzer/static/js/2.f204c65c.chunk.js",
+    "static/js/2.f204c65c.chunk.js.map": "/spotify-playlist-analyzer/static/js/2.f204c65c.chunk.js.map",
+    "static/js/3.75eb058e.chunk.js": "/spotify-playlist-analyzer/static/js/3.75eb058e.chunk.js",
+    "static/js/3.75eb058e.chunk.js.map": "/spotify-playlist-analyzer/static/js/3.75eb058e.chunk.js.map",
     "index.html": "/spotify-playlist-analyzer/index.html",
     "static/css/main.8c8b27cf.chunk.css.map": "/spotify-playlist-analyzer/static/css/main.8c8b27cf.chunk.css.map",
-    "static/js/2.fae844c9.chunk.js.LICENSE.txt": "/spotify-playlist-analyzer/static/js/2.fae844c9.chunk.js.LICENSE.txt",
+    "static/js/2.f204c65c.chunk.js.LICENSE.txt": "/spotify-playlist-analyzer/static/js/2.f204c65c.chunk.js.LICENSE.txt",
     "static/media/Checkmark.ba1af504.png": "/spotify-playlist-analyzer/static/media/Checkmark.ba1af504.png",
     "static/media/goback.10d456e3.png": "/spotify-playlist-analyzer/static/media/goback.10d456e3.png",
     "static/media/spotifylogo.6c526b82.png": "/spotify-playlist-analyzer/static/media/spotifylogo.6c526b82.png"
   },
   "entrypoints": [
-    "static/js/runtime-main.abfc5f79.js",
-    "static/js/2.fae844c9.chunk.js",
+    "static/js/runtime-main.4777b651.js",
+    "static/js/2.f204c65c.chunk.js",
     "static/css/main.8c8b27cf.chunk.css",
-    "static/js/main.71517af1.chunk.js"
+    "static/js/main.92e79334.chunk.js"
   ]
 }
