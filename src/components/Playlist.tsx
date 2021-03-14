@@ -663,17 +663,7 @@ class PlaylistItems extends React.Component<Props, any>{
     if(this.state.errorStatus == false && this.state.loading == false){
       return(<View/>)
     }
-    else if(this.state.loading == true){
-      return(
-        <View style={{height:'50vh', width:'50vh', justifyContent:'space-between', borderRadius:20, padding:'1%', position:'absolute',zIndex:10, alignSelf:'center', marginTop:'8%'}}>
-          <ActivityIndicator size="large" color="#00ff00"/>
-        </View>
-      )
-    }
     else if(this.state.errorStatus==true){
-      this.setState({
-        loading:false,
-      })
       return(
         <View style={{height:'20vh', width:'30vw', justifyContent:'space-between', flexDirection:'column', backgroundColor:'white', borderRadius:20, padding:'1%', position:'absolute',zIndex:10, alignSelf:'center', marginTop:'8%', shadowColor:'black',shadowRadius:10}}>
           <Text style={{fontSize:16, fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'), color:'black', fontWeight:'700', letterSpacing:1, textTransform:'uppercase' }}>ERROR RETRIEVING {this.state.collectionType}</Text>
@@ -681,6 +671,13 @@ class PlaylistItems extends React.Component<Props, any>{
             <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#1DB954', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius:50, shadowColor:'black',shadowRadius:5, shadowOffset:{width:1,height:1}}} onPress={()=>{this.props.navigation.navigate('Spotify Public Playlist Analyzer')}}>
               <Text style={{color:'white', alignSelf:'center', fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'), letterSpacing:1, fontWeight:'600'}}>GO BACK</Text>
             </TouchableOpacity>
+        </View>
+      )
+    }
+    else if(this.state.loading == true){
+      return(
+        <View style={{height:'50vh', width:'50vh', justifyContent:'space-between', borderRadius:20, padding:'1%', position:'absolute',zIndex:10, alignSelf:'center', marginTop:'8%'}}>
+          <ActivityIndicator size="large" color="#00ff00"/>
         </View>
       )
     }
