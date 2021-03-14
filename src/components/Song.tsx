@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
 import { Image, StyleSheet, TouchableOpacity, Text, View, ImageBackground} from 'react-native';
-import axios from 'axios';
 import {PieChart} from 'react-minimal-pie-chart';
-import AxiosGetTrackAnalysis from '../requests/AxiosGetTrackAnalysis';
-import { BrowserView, MobileView, isMobile } from "react-device-detect";
+import { GetTrackAnalysis} from '../requests/Index';
+import { isMacOs, isMobile } from "react-device-detect";
+import {Hoverable} from 'react-native-web-hover';
 
 interface Props{
   navigation:any,
@@ -54,7 +54,7 @@ class Song extends React.Component<Props, any>{
       id: this.props.route.params.songID,
     });
     try{
-      let trackAnalysis = await AxiosGetTrackAnalysis.GetTrackAnalysis(this.state.id, this.state.token);
+      let trackAnalysis = await GetTrackAnalysis(this.state.id, this.state.token);
       this.setState({
         bars: trackAnalysis.bars.length,
         beats: trackAnalysis.beats.length,
@@ -68,9 +68,11 @@ class Song extends React.Component<Props, any>{
 
   render() {return (
     <ImageBackground source = {{uri:this.state.artwork}} style = {styles.backgroundimage} blurRadius= {200}>
-        <TouchableOpacity style={styles.spotifyButton} onPress={()=>{window.open(this.state.externalUrl,'_blank')}}>
-          <Text style={styles.buttonText}>PLAY ON SPOTIFY</Text>
-        </TouchableOpacity>
+        <Hoverable>
+          {({hovered})=>(<TouchableOpacity style={{ backgroundColor: '#1DB954', justifyContent:'center', borderRadius: 100, width: 150, height:'4vh', alignSelf: 'flex-end', marginRight: '2%', marginBottom: '-1%', marginTop: 80, shadowColor:'black', shadowRadius:6, shadowOffset:{width:2,height:1},zIndex:1, opacity: (hovered? .6:1)}} onPress={()=>{window.open(this.state.externalUrl,'_blank')}}>
+            <Text style={styles.buttonText}>PLAY ON SPOTIFY</Text>
+          </TouchableOpacity>)}
+        </Hoverable>
         <View style={{justifyContent: 'center'}}>
           <View style={{shadowColor:'black',shadowRadius:70,  height: (isMobile? 341:500), width: (isMobile? 341:500), alignSelf: 'center', borderRadius: 500, zIndex:3,}}>
             <Image source={{uri: this.state.artwork}} style={{resizeMode:'contain', height: (isMobile? 341:500), width: (isMobile? 341:500), alignSelf: 'center', borderRadius: 500, zIndex:3,}} blurRadius={20}/>
@@ -225,7 +227,7 @@ class Song extends React.Component<Props, any>{
 const styles = StyleSheet.create({
   songTitle:{
     color: 'white',
-    fontFamily:'Segoe UI',
+    fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textShadowColor:'black',
     textShadowRadius:3,
     textShadowOffset: {width:2,height:1},
@@ -236,7 +238,7 @@ const styles = StyleSheet.create({
   },
   songArtist:{
     color: 'white',
-    fontFamily:'Segoe UI',
+    fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textShadowColor:'black',
     textShadowRadius:3,
     textShadowOffset: {width:2,height:1},
@@ -247,7 +249,7 @@ const styles = StyleSheet.create({
   },
   songTypeYear:{
     color: 'white',
-    fontFamily:'Segoe UI',
+    fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textShadowColor:'black',
     textShadowRadius:3,
     textShadowOffset: {width:2,height:1},
@@ -267,7 +269,7 @@ const styles = StyleSheet.create({
   },
   statTextLeft:{
     color: 'white',
-    fontFamily:'Segoe UI',
+    fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textShadowColor:'black',
     textShadowRadius:3,
     textShadowOffset: {width:2,height:1},
@@ -277,7 +279,7 @@ const styles = StyleSheet.create({
   },
   statTextRight:{
     color: 'white',
-    fontFamily:'Segoe UI',
+    fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textShadowColor:'black',
     textShadowRadius:3,
     textShadowOffset: {width:2,height:1},
@@ -288,7 +290,7 @@ const styles = StyleSheet.create({
   },
   statDescText:{
     color: 'white',
-    fontFamily: 'Segoe UI',
+    fontFamily: (isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textShadowColor:'black',
     textShadowRadius:3,
     textShadowOffset: {width:2,height:1},
@@ -297,7 +299,7 @@ const styles = StyleSheet.create({
   },
   statDescTextRight:{
     color: 'white',
-    fontFamily: 'Segoe UI',
+    fontFamily: (isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textShadowColor:'black',
     textShadowRadius:3,
     textShadowOffset: {width:2,height:1},
@@ -307,7 +309,7 @@ const styles = StyleSheet.create({
   },
   graphValues:{
     color: 'white',
-    fontFamily: 'Segoe UI',
+    fontFamily: (isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textShadowColor:'black',
     textShadowRadius:3,
     textShadowOffset: {width:2,height:1},
@@ -364,7 +366,7 @@ const styles = StyleSheet.create({
     color:'white',
     fontSize: 12,
     fontWeight: '600',
-    fontFamily: 'Segoe UI',
+    fontFamily: (isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     letterSpacing:1,
     textAlign: 'center',
     textAlignVertical:'center',

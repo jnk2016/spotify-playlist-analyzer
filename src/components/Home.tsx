@@ -2,14 +2,12 @@ import React, {Component,} from 'react';
 import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity } from 'react-native';
 import trackbar from '../assets/images/trackbar.jpg';
 import playButton from '../assets/images/playButton.jpg';
-import skipButton from '../assets/images/skipButton.jpg';
-import backButton from '../assets/images/backButton.jpg';
 import skipIcon from '../assets/images/skipIcon.jpg';
 import emptySongAlbum from '../assets/images/emptySongAlbum.jpg';
 import linkedInLogo from '../assets/images/linkedinLogo.png';
 import LinearGradient from '../assets/Features/LinearGradient';
 import CheckMark from '../assets/images/Checkmark.png';
-import { BrowserView, MobileView, isMobile } from "react-device-detect";
+import { BrowserView, MobileView, isMobile, isMacOs } from "react-device-detect";
 import {Hoverable} from 'react-native-web-hover';
 
 interface Props{
@@ -22,6 +20,7 @@ class Home extends React.Component<Props, any>{
     this.state = {
       infoType:'data',
       uri: '37i9dQZF1DWSP55jZj2ES3',
+      collectionType: 'playlist',
     };
   }
   
@@ -150,17 +149,21 @@ class Home extends React.Component<Props, any>{
   render(){return(
     <LinearGradient  colors = {['#353535', '#494949','#252525']} style={{ minHeight:'100vh'}}>
       <View style={styles.header}>
-          <Text style={styles.analysisText}>SPOTIFY PUBLIC PLAYLIST ANALYZER</Text>
+          <Text style={styles.analysisText}>SPOTIFY TRACK COLLECTION ANALYZER</Text>
           <BrowserView>
             <View style={styles.headerLinks}>
               <Text style={styles.headerLinkText}>Developer:</Text>
-              <TouchableOpacity style={{marginLeft:'2%', shadowColor:'white', shadowRadius:10, borderRadius:500, height:35, width:35,marginHorizontal:'10%'}} onPress={()=>{window.open('https://www.linkedin.com/in/jackson-kim-480949191/','_blank')}}>
-                <Image source={{uri:linkedInLogo}} style={styles.linkImage}/>
-              </TouchableOpacity>
+              <Hoverable>
+                {({hovered})=>(<TouchableOpacity style={{marginLeft:'2%', shadowColor:'white', shadowRadius:10, borderRadius:500, height:35, width:35,marginHorizontal:'10%', opacity: (hovered? .7:1)}} onPress={()=>{window.open('https://www.linkedin.com/in/jackson-kim-480949191/','_blank')}}>
+                  <Image source={{uri:linkedInLogo}} style={styles.linkImage}/>
+                </TouchableOpacity>)}
+              </Hoverable>
               <Text style={styles.headerLinkText}>Designer:</Text>
-              <TouchableOpacity style={{marginLeft:'2%', shadowColor:'white', shadowRadius:10, borderRadius:500, height:35, width:35,marginHorizontal:'10%'}} onPress={()=>{window.open('https://www.linkedin.com/in/danphuong-hoang-0baa58138/','_blank')}}>
-                <Image source={{uri:linkedInLogo}} style={styles.linkImage}/>
-              </TouchableOpacity>
+              <Hoverable>
+                {({hovered})=>(<TouchableOpacity style={{marginLeft:'2%', shadowColor:'white', shadowRadius:10, borderRadius:500, height:35, width:35,marginHorizontal:'10%', opacity: (hovered? .7:1)}} onPress={()=>{window.open('https://www.linkedin.com/in/danphuong-hoang-0baa58138/','_blank')}}>
+                  <Image source={{uri:linkedInLogo}} style={styles.linkImage}/>
+                </TouchableOpacity>)}
+              </Hoverable>
             </View>
           </BrowserView>
           <MobileView>
@@ -181,23 +184,36 @@ class Home extends React.Component<Props, any>{
             <View style={styles.grayBar}/>
             <TextInput
               style={styles.inputUri}
-              placeholder={"Copy and Paste Playlist Link of Public Spotify Playlist"}
+              placeholder={"Copy and Paste link to Artist, Album, or Public Spotify Playlist"}
               allowFontScaling={true}
-              placeholderTextColor='white'
+              placeholderTextColor='#D2D2D2'
               onChangeText={inputUri=>{
-                inputUri = inputUri.replace('https://open.spotify.com/playlist/', '');
+                if(inputUri.includes('playlist')){
+                  inputUri = inputUri.replace('https://open.spotify.com/playlist/', '');
+                  this.setState({ collectionType:'playlist' });
+                }
+                else if(inputUri.includes('album')){
+                  inputUri = inputUri.replace('https://open.spotify.com/album/', '');
+                  this.setState({ collectionType:'album' });
+                }
+                else if(inputUri.includes('artist')){
+                  inputUri = inputUri.replace('https://open.spotify.com/artist/', '');
+                  this.setState({ collectionType:'artist' });
+                }
+                
+                // inputUri = inputUri.replace('https://open.spotify.com/playlist/', '');
                 inputUri = inputUri.slice(0,22);
                 this.setState({uri:inputUri});
                 }}/>
             <View style={styles.grayBar}/>
           </LinearGradient>
           <View style={{alignSelf:'center', width:'40%', minWidth: 300,}}>
-            <Text style={styles.clickText}>CLICK THE PLAY BUTTON TO ANALYZE</Text>
+            <Text style={styles.clickText}>CLICK THE PLAY BUTTON TO ANALYZE COLLECTION</Text>
             <Image source = {{uri:trackbar}} style={{alignSelf: 'flex-start', width:'100%', paddingVertical:'3vh', resizeMode:'contain'}}/>
             <View style={{flexDirection:'row', justifyContent:'space-evenly', paddingVertical:'2vh'}}>
               <Image source = {{uri:skipIcon}} style={{alignSelf:'center', width:'20vw', paddingVertical:'5vh', resizeMode:'contain', tintColor:'white', transform:[{rotate:'180deg'}]}}/>
               <Hoverable>
-              {({hovered}) => (<TouchableOpacity onPress={()=>this.props.navigation.navigate('Playlist Analysis', {playlistUri:this.state.uri})} style={{height:'12vh', width:'12vh', borderRadius: 500, shadowColor:'white', shadowRadius:(hovered?20:5), backgroundColor:'white'}}>
+              {({hovered}) => (<TouchableOpacity onPress={()=>this.props.navigation.navigate('Track Collection Analysis', {Uri:this.state.uri, Type: this.state.collectionType})} style={{height:'12vh', width:'12vh', borderRadius: 500, shadowColor:'white', shadowRadius:(hovered?20:5), backgroundColor:'white'}}>
                 <Image source = {{uri:playButton}} style={{alignSelf:'center', width:'12vh', height:'12vh', resizeMode:'cover', borderRadius:500, shadowColor:'white', shadowRadius:(hovered?20:5), backgroundColor:'white'}}/>
               </TouchableOpacity>)}
               </Hoverable>
@@ -206,9 +222,18 @@ class Home extends React.Component<Props, any>{
           </View>
           <BrowserView>
             <View style={styles.headerOptions}>
-              <TouchableOpacity onPress={()=>{this.setState({infoType:'data'})}}><Text style = {styles.headerOptionsText}>audio data</Text></TouchableOpacity>
-              <TouchableOpacity onPress={()=>{this.setState({infoType:'features'})}}><Text style = {styles.headerOptionsText}>audio features</Text></TouchableOpacity>
-              <TouchableOpacity onPress={()=>{this.setState({infoType:'analysis'})}}><Text style = {styles.headerOptionsText}>audio analysis</Text></TouchableOpacity>
+              <Hoverable>
+                {({hovered})=>(<TouchableOpacity onPress={()=>{this.setState({infoType:'data'})}}>
+                  <Text style = {{ fontFamily:(isMacOs? 'BlinkMacSystemFont' : 'Segoe UI'), color:'white', textShadowColor:'white', textShadowRadius:14, fontSize: 20, letterSpacing:1, opacity: (hovered? .6:1)}}>audio data</Text></TouchableOpacity>)}
+              </Hoverable>
+              <Hoverable>
+                {({hovered})=>(<TouchableOpacity onPress={()=>{this.setState({infoType:'features'})}}>
+                  <Text style = {{ fontFamily:(isMacOs? 'BlinkMacSystemFont' : 'Segoe UI'), color:'white', textShadowColor:'white', textShadowRadius:14, fontSize: 20, letterSpacing:1, opacity: (hovered? .6:1)}}>audio features</Text></TouchableOpacity>)}
+              </Hoverable>
+              <Hoverable>
+                {({hovered})=>(<TouchableOpacity onPress={()=>{this.setState({infoType:'analysis'})}}>
+                  <Text style = {{ fontFamily:(isMacOs? 'BlinkMacSystemFont' : 'Segoe UI'), color:'white', textShadowColor:'white', textShadowRadius:14, fontSize: 20, letterSpacing:1, opacity: (hovered? .6:1)}}>audio analysis</Text></TouchableOpacity>)}
+              </Hoverable>  
             </View>
           </BrowserView>
           <MobileView>
@@ -232,7 +257,7 @@ const styles = StyleSheet.create({
     marginVertical:'3vh',
   },
   rightFeaturesText:{
-    fontFamily:'Segoe UI',
+    fontFamily:(isMacOs? 'BlinkMacSystemFont' : 'Segoe UI'),
     color:'white',
     fontSize:22,
     letterSpacing:1,
@@ -240,19 +265,17 @@ const styles = StyleSheet.create({
   },
   infoHeaderText:{
     textAlign:'center',
-    fontFamily:'Segoe UI',
+    fontFamily:(isMacOs? 'BlinkMacSystemFont' : 'Segoe UI'),
     color:'white',
     fontSize:30,
     fontWeight:'600',
     letterSpacing:1,
     borderColor:'white',
     borderBottomWidth:1,
-    // borderTopWidth:1,
     marginTop:'1vh',
-    // paddingHorizontal:'2vw'
   },
   rightDataText:{
-    fontFamily:'Segoe UI',
+    fontFamily:(isMacOs? 'BlinkMacSystemFont' : 'Segoe UI'),
     color:'white',
     fontSize:22,
     padding:'1%',
@@ -264,7 +287,6 @@ const styles = StyleSheet.create({
   rightData:{
     justifyContent:'center',
     flexDirection:'row',
-    // marginTop:'-2%',
   },
   featureContainer:{
     flexDirection:'column',
@@ -275,7 +297,6 @@ const styles = StyleSheet.create({
   dataContainer:{
     flexDirection:'column',
     justifyContent:'space-between',
-    // paddingBottom:'1%',
     width:'80%',
     minHeight:'60vh',
   },
@@ -286,40 +307,34 @@ const styles = StyleSheet.create({
     minHeight:'60vh',
   },
   rightAnalysisText:{
-    fontFamily:'Segoe UI',
+    fontFamily:(isMacOs? 'BlinkMacSystemFont' : 'Segoe UI'),
     color:'white',
     fontSize:22,
     borderRadius:50,
-    // paddingLeft:'1%',
-    // padding:'1%',
-    // width:'57%',
     flex:1,
     flexDirection:'row',
     alignSelf:'center',
   },
   analysisText:{
-    fontFamily:'Segoe UI',  // Gotten from Index
+    fontFamily:(isMacOs? 'BlinkMacSystemFont' : 'Segoe UI'),  // Gotten from Index
     color:'white',
     fontSize: 25,
-    // marginTop:'2%',
     fontWeight:'700',
     letterSpacing:1,
-    // paddingLeft: '2%',
     flex:1,
   },
   sortText:{
-    fontFamily:'Segoe UI',
+    fontFamily:(isMacOs? 'BlinkMacSystemFont' : 'Segoe UI'),
     color:'white',
     fontSize: 22,
     marginVertical:'2%',
   },
   clickText:{
-    fontFamily:'Segoe UI',
+    fontFamily:(isMacOs? 'BlinkMacSystemFont' : 'Segoe UI'),
     color:'white',
     fontSize: (isMobile? 20:25),
     marginVertical:'2%',
     fontWeight:'500',
-    // alignSelf:'center',
   },
   grayBar:{
     backgroundColor:'#353535',
@@ -329,36 +344,33 @@ const styles = StyleSheet.create({
     borderRadius:50,
     zIndex:1,
     marginLeft:'-2%',
+    shadowColor:'black',
+    shadowRadius: 6,
+    shadowOffset: {width:4, height:2}
   },
   inputUri:{
     backgroundColor:'#353535',
     borderRadius:50,
     textAlign:'center',
     textAlignVertical:'center',
+    fontSize:(isMobile? 9: 11),
+    color:'white',
     height:'15%',
     marginHorizontal:'3%',
     borderColor:'white',
     borderWidth:3,
-    // shadowColor:'black',
-    // shadowRadius:10,
-    // shadowOffset:{width: 5,height:6}
   },
   playlist:{
     flexDirection:'column',
-    // width:'36vw',
     width:'80vw',
     minWidth: 370,
-    // minHeight:500,
-    // height:'93vh',
     marginTop:'2vh',
     padding:'2%',
     paddingBottom:'1%',
-    // marginLeft:'32vw',
     alignSelf:'center',
     position:'relative',
   },
   backgroundImage:{
-    // resizeMode:'stretch',
     height:'26vw',
     width:'26vw',
     minHeight:270,
@@ -366,6 +378,9 @@ const styles = StyleSheet.create({
     alignSelf:'center',
     justifyContent: 'space-evenly',
     borderRadius:500,
+    shadowColor:'black',
+    shadowRadius: 7,
+    shadowOffset: {width:4, height:3}
   },
   header:{
     flexDirection:'row',
@@ -374,23 +389,19 @@ const styles = StyleSheet.create({
     marginTop:'1%',
     flex:1,
     alignSelf:'center',
-    // zIndex:10,
-    // position:'absolute'
   },
   headerLinks:{
     flexDirection:'row',
     flex:1,
-    // width:'36%',
   },
   headerLinkText:{
-    fontFamily:'Segoe UI',
+    fontFamily:(isMacOs? 'BlinkMacSystemFont' : 'Segoe UI'),
     color:'#A4A4A4',
     textShadowColor:'white',
     textShadowRadius:1,
     fontSize: 15,
     letterSpacing:1,
-    // marginLeft:'%',
-    // flex:1
+    marginLeft:(isMobile? '0':'3%'),
   },
   linkImage:{
     height:35,
@@ -405,7 +416,6 @@ const styles = StyleSheet.create({
     flex:1,
     justifyContent:'space-evenly',
     width:'100%',
-    // marginLeft:'2vh',
     marginVertical:'2vh',
     paddingVertical:'2vh',
     borderColor:'white',
@@ -419,14 +429,13 @@ const styles = StyleSheet.create({
     textAlign:'center',
     width:'100%',
     alignSelf:'center',
-    // marginLeft:'2vh',
     marginVertical:'2vh',
     paddingVertical:'2vh',
     borderColor:'white',
     borderWidth:1,
   },
   headerOptionsText:{
-    fontFamily:'Segoe UI',
+    fontFamily:(isMacOs? 'BlinkMacSystemFont' : 'Segoe UI'),
     color:'white',
     textShadowColor:'white',
     textShadowRadius:14,

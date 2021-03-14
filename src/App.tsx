@@ -9,6 +9,7 @@ import Song from './components/Song';
 import spotifylogo from './assets/images/spotifylogo.png';
 import goback from './assets/images/goback.png'
 import {Hoverable} from 'react-native-web-hover';
+import {isMacOs} from 'react-device-detect';
 
 function App() {
   const config = {
@@ -51,12 +52,12 @@ function App() {
             },
             headerTitleStyle: {
               fontWeight: '600', //Set Header text style
-              fontFamily: 'Segoe UI',
+              fontFamily: (isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
               letterSpacing:2,
               color:'white',
             },
           }}/>
-        <Stack.Screen name='Playlist Analysis' component={Playlist}
+        <Stack.Screen name='Track Collection Analysis' component={Playlist}
           options={{
             headerBackImage: ()=>(
             <Hoverable>
@@ -75,7 +76,7 @@ function App() {
             },
             headerTitleStyle: {
               fontWeight: '600', //Set Header text style
-              fontFamily: 'Segoe UI',
+              fontFamily: (isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
               letterSpacing:2,
               color:'white',
             },

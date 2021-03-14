@@ -1,10 +1,8 @@
 import React, {Component, useState} from 'react';
-import {Button, Image, StyleSheet, TextInput, TouchableOpacity, Text, View, ScrollView } from 'react-native';
-import axios from 'axios';
-import AxiosGetPlaylist from '../requests/AxiosGetPlaylist';
-import AxiosGetToken from '../requests/AxiosGetToken';
+import { Image, StyleSheet, TextInput, TouchableOpacity, Text, View, ScrollView } from 'react-native';
+import { GetToken, GetPlaylist, GetPlaylistTracks, GetAlbum, GetAllArtistTracks, GetAudioFeatures } from '../requests/Index';
 import LinearGradient from '../assets/Features/LinearGradient';
-import { BrowserView, MobileView, isMobile } from "react-device-detect";
+import { isMacOs, isMobile } from "react-device-detect";
 import {Hoverable} from 'react-native-web-hover';
 
 interface Props{
@@ -44,16 +42,20 @@ class PlaylistItems extends React.Component<Props, any>{
       showFilterSpecs: 'initial',
       min:0,
       max:200,
-      playlistUri:this.props.route.params.playlistUri,
+      Uri:this.props.route.params.Uri,
       // New state stuff
       trackIds:[],
       trackIdStr:'',
       TrackSimple:[],
       TrackFeatures:[],
       // New URL to playlist
-      playlistUrl: 'spotify.com',
+      Url: 'spotify.com',
       // Error Popup
       errorStatus:false,
+
+      // Type of track collection (album, playlist, artist)
+      collectionType: this.props.route.params.Type,
+      // 
     };
   }
 
@@ -63,88 +65,77 @@ class PlaylistItems extends React.Component<Props, any>{
 
   renderValues = async() =>{
     try{
+
       /* Getting the access token  */
-      let token = await AxiosGetToken.GetToken();
+      let token = await GetToken();
       this.setState({
         AuthToken: token.access_token
       })
+
       /* Get all the tracks from the playlist */
-      let playlist = await axios({
-      method: 'get',
-      url:`https://api.spotify.com/v1/playlists/${this.state.playlistUri}`,
-      headers: {
-        Authorization: `Bearer ${this.state.AuthToken}`
-      },
-      })
-      .then(response=>{
-          return response.data;
-      })
-      .catch(err =>{
-          this.setState({
-            errorStatus:true,
-          })
-          console.log(err.response);
-          return err.response;
-      });
+      const GetCollection =async()=>{
+        if(this.state.collectionType == 'playlist'){
+          return await GetPlaylist(this.state.Uri, this.state.AuthToken);
+        }
+        else if(this.state.collectionType == 'album'){
+          return await GetAlbum(this.state.Uri, this.state.AuthToken);
+        }
+        else if(this.state.collectionType == 'artist'){
+          return await GetAllArtistTracks(this.state.Uri, this.state.AuthToken);
+        }
+      }
+
+      let collection = await GetCollection();
+      if(collection == true){ this.setState({errorStatus: true})}
+
       // New Stuff
       this.setState({
-        trackIds: playlist.tracks.items.filter((track:any)=> {  // Use filter since spotify takes down songs that are already in a playlist...
-          if(track.track.name == ""){
+        trackIds: (this.state.collectionType == 'artist' ? collection.tracks : collection.tracks.items).filter((track:any, index=0)=> {  // Use filter since spotify takes down songs that are already in a playlist...
+          if((this.state.collectionType == 'artist' && index >= 100) || (this.state.collectionType == 'playlist'? track.track.name: track.name) == ""){
+            index++;
             return false;
           }
+          index++;
           return true;
         }).map((track:any)=>{
-          return(track.track.id);
+          return((this.state.collectionType == 'playlist'? track.track.id: track.id));
         }),
-        TrackSimple: playlist.tracks.items.filter((track:any)=> {
-          if(track.track.name == ""){
+        TrackSimple: (this.state.collectionType == 'artist' ? collection.tracks : collection.tracks.items).filter((track:any)=> {
+          if((this.state.collectionType == 'playlist'? track.track.name: track.name) == ""){
             return false;
           }
           return true;
         }).map((track:any)=>{
-          let minutes = Math.floor(track.track.duration_ms/60000);
-          let seconds = Math.round((track.track.duration_ms - (60000*minutes))/1000);
+          
+          let minutes = Math.floor((this.state.collectionType == 'playlist'? track.track.duration_ms : track.duration_ms)/60000);
+          let seconds = Math.round(((this.state.collectionType == 'playlist' ? track.track.duration_ms : track.duration_ms) - (60000*minutes))/1000);
+          
           let dur = `${minutes}:${seconds}`;
           if(seconds<10){dur = `${minutes}:0${seconds}`;}
-          let allArtists = track.track.artists.map((artist:any)=>{return artist.name});
+
+          let allArtists = (this.state.collectionType == 'playlist'? track.track.artists: track.artists).map((artist:any)=>{return artist.name});
           allArtists=allArtists.join(', ');
           return({
-            artwork: track.track.album.images[1].url,
-            name: track.track.name,
-            // artists: track.track.artists[0].name,
+            artwork: (this.state.collectionType == 'playlist' ? track.track.album.images[1] : this.state.collectionType == 'artist' ? track.artwork[1] : collection.images[1]).url,
+            name: (this.state.collectionType == 'playlist'? track.track : track).name,
             artists: allArtists,
-            album: track.track.album.name,
+            album: (this.state.collectionType == 'playlist' ? track.track.album.name : this.state.collectionType == 'artist' ? track.album_name : collection.name),
             duration: dur,
-            id: track.track.id,
-            popularity: track.track.popularity,
-            externalUrl: track.track.external_urls.spotify,
+            id: (this.state.collectionType == 'playlist'? track.track : track).id,
+            popularity: (this.state.collectionType == 'playlist'? track.track : this.state.collectionType == 'artist'? track : collection).popularity,
+            externalUrl: (this.state.collectionType == 'playlist'? track.track : track).external_urls.spotify,
           });
         }),
-        TrackAmount: playlist.tracks.total,
-        playlistUrl: playlist.external_urls.spotify,
+        TrackAmount: (this.state.collectionType == 'artist'? collection.total : collection.tracks.total),
+        Url: collection.external_urls.spotify, 
       })
       this.setState({
         trackIdStr: this.state.trackIds.join(',')
       })
-      
-      let features = await axios({
-        method: 'get',
-        url:`https://api.spotify.com/v1/audio-features`,
-        headers: {
-          Authorization: `Bearer ${this.state.AuthToken}`
-        },
-        params:{
-          ids:`${this.state.trackIdStr}`
-        }
-        })
-        .then(response=>{
-            return response.data;
-        })
-        .catch(err =>{
-            console.log(err.response);
-            return err.response;
-        });
+
       /* features.audio_features */
+      let features = await GetAudioFeatures(this.state.AuthToken, this.state.trackIdStr);
+      
       this.setState({
         TrackFeatures: features.audio_features.map((songFeatures:any)=>{
           let keyString = determineKey(songFeatures.key);
@@ -171,76 +162,57 @@ class PlaylistItems extends React.Component<Props, any>{
       let iterations = Math.floor(this.state.TrackAmount/100);
       for(var i = 0; i<iterations; i++){
         /* Get all the tracks from the playlist */
-        let newPlaylist = await axios({
-        method: 'get',
-        url:`https://api.spotify.com/v1/playlists/${this.state.playlistUri}/tracks`,
-        headers: {
-          Authorization: `Bearer ${this.state.AuthToken}`
-        },
-        params:{
-          offset: 100*(1+i)
-        },
-        })
-        .then(response=>{
-            return response.data;
-        })
-        .catch(err =>{
-            return err.response;
-        });
-        // New Stuff
+        let newCollection = [];
+        if(this.state.collectionType == 'playlist'){
+          newCollection = await GetPlaylistTracks(this.state.Uri, this.state.AuthToken, 100*(1+i));
+        }
+        /* Setting retrieved data to this.state.trackIds */
         this.setState({
-          trackIds: newPlaylist.items.filter((track:any)=> {
-            if(track.track.name == ""){
+          trackIds: (this.state.collectionType == 'artist'? collection.tracks : newCollection.items).filter((track:any, index=100*(1+i))=> {
+            if((this.state.collectionType == 'artist' && (index < 100*(1+i) || index >= collection.total || index >= 100*(2+i))) || (this.state.collectionType == 'playlist'? track.track.name: track.name) == ""){
+              index++;
               return false;
             }
+            index++;
             return true;
           }).map((track:any)=>{
-            return(track.track.id);
+            return(this.state.collectionType == 'artist'? track.id : track.track.id);
           }),
-          TrackSimple: this.state.TrackSimple.concat(newPlaylist.items.filter((track:any)=> {
-            if(track.track.name == ""){
-              return false;
-            }
-            return true;
-          }).map((track:any)=>{
-            let minutes = Math.floor(track.track.duration_ms/60000);
-            let seconds = Math.round((track.track.duration_ms - (60000*minutes))/1000);
-            let dur = `${minutes}:${seconds}`;
-            let artUrl = '';
-            if(seconds<10){dur = `${minutes}:0${seconds}`;}
-            return({
-              artwork: track.track.album.images[1].url,
-              name: track.track.name,
-              artists: track.track.artists[0].name,
-              album: track.track.album.name,
-              duration: dur,
-              id: track.track.id,
-              popularity: track.track.popularity,
-              externalUrl: track.track.external_urls.spotify,
-            });
-          }))
-        })
+        });
+        if(this.state.collectionType == 'playlist'){
+          this.setState({
+            TrackSimple: this.state.TrackSimple.concat(newCollection.items.filter((track:any)=> {
+              if(track.track.name == ""){
+                return false;
+              }
+              return true;
+            }).map((track:any)=>{
+              let minutes = Math.floor(track.track.duration_ms/60000);
+              let seconds = Math.round((track.track.duration_ms - (60000*minutes))/1000);
+              let dur = `${minutes}:${seconds}`;
+              if(seconds<10){dur = `${minutes}:0${seconds}`;}
+              let allArtists = track.track.artists.map((artist:any)=>{return artist.name});
+              allArtists=allArtists.join(', ');
+              return({
+                artwork: track.track.album.images[1].url,
+                name: track.track.name,
+                artists: allArtists,
+                album: track.track.album.name,
+                duration: dur,
+                id: track.track.id,
+                popularity: track.track.popularity,
+                externalUrl: track.track.external_urls.spotify,
+              });
+            }))
+          });
+        }
+
         this.setState({
           trackIdStr: this.state.trackIds.join(',')
         })
         
-        let newFeatures = await axios({
-          method: 'get',
-          url:`https://api.spotify.com/v1/audio-features`,
-          headers: {
-            Authorization: `Bearer ${this.state.AuthToken}`
-          },
-          params:{
-            ids:`${this.state.trackIdStr}`
-          }
-          })
-          .then(response=>{
-              return response.data;
-          })
-          .catch(err =>{
-              return err.response;
-          });
         /* features.audio_features */
+        let newFeatures = await GetAudioFeatures(this.state.AuthToken, this.state.trackIdStr)
         this.setState({
           TrackFeatures: this.state.TrackFeatures.concat(newFeatures.audio_features.map((songFeatures:any)=>{
             let keyString = determineKey(songFeatures.key);
@@ -265,6 +237,7 @@ class PlaylistItems extends React.Component<Props, any>{
           }))
         })
       }
+
       /* combining features with simple */
       let merged = [];
       for(let i=0; i< this.state.TrackSimple.length; i++){
@@ -277,12 +250,37 @@ class PlaylistItems extends React.Component<Props, any>{
         TrackDetails:merged
       })
 
+        if(this.state.collectionType == 'playlist'){
+          this.setState({
+            Owner: collection.owner.display_name,
+            TrackAmount: collection.tracks.total,
+            Descrip: collection.description.replace(/&#x27;|&quot;/gi, "'"),
+          })
+        }
+        else if(this.state.collectionType == 'album'){
+          let allOwners = collection.artists.map((artist:any)=>{return artist.name});
+          allOwners=allOwners.join(', ');
+
+          this.setState({
+            Owner: allOwners,
+            TrackAmount: collection.total_tracks,
+            Descrip: collection.label,
+          })
+        }
+        else if(this.state.collectionType == 'artist'){
+          let description = collection.genres.map((genre:any)=>{return genre});
+          description=description.join(', ');
+
+          this.setState({
+            Owner: '',
+            TrackAmount: collection.total,
+            Descrip: description,
+          })
+        }
+
       this.setState({
-        Name: playlist.name,
-        ImageUrl: playlist.images[0].url,
-        Owner: playlist.owner.display_name,
-        Descrip: playlist.description.replace(/&#x27;|&quot;/gi, "'"),
-        TrackAmount: playlist.tracks.total,
+        Name: (this.state.collectionType == 'artist' ? collection.artist : collection.name),
+        ImageUrl: collection.images[0].url,
 
         BasicInfo: this.state.TrackDetails.map((song:any, i:any) => {
           return(
@@ -362,6 +360,10 @@ class PlaylistItems extends React.Component<Props, any>{
     this.setState({
       TrackDetails: this.state.TrackDetails.sort((a:any,b:any) => (a.artists > b.artists) ? 1 : -1)
     })}
+    else if(sortMethod == 'album'){
+      this.setState({
+        TrackDetails: this.state.TrackDetails.sort((a:any,b:any) => (a.album > b.album) ? 1 : -1)
+      })}
     this.setState({
       BasicInfo: this.state.TrackDetails.map((song:any,i:any) => {
         return(
@@ -576,7 +578,7 @@ class PlaylistItems extends React.Component<Props, any>{
           </View>
           <View style={{flexDirection: 'row', justifyContent:'space-evenly',marginBottom:'3%', marginTop: '1%',}}>
             <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#1DB954', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius:50, shadowColor:'black',shadowRadius:5, shadowOffset:{width:1,height:1}}} onPress={()=>{this.filterPlaylist('energy', {minEnergy:this.state.min, maxEnergy:this.state.max})}}>
-              <Text style={{color:'white', alignSelf:'center', fontFamily:'Segoe UI', letterSpacing:1, fontWeight:'600'}}>FILTER</Text>
+              <Text style={{color:'white', alignSelf:'center', fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'), letterSpacing:1, fontWeight:'600'}}>FILTER</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -613,7 +615,7 @@ class PlaylistItems extends React.Component<Props, any>{
           </View>
           <View style={{flexDirection: 'row', justifyContent:'space-evenly',marginBottom:'3%', marginTop: '1%',}}>
             <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#1DB954', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius:50, shadowColor:'black',shadowRadius:5, shadowOffset:{width:1,height:1}}} onPress={()=>{this.filterPlaylist('bpm', {minBpm:this.state.min, maxBpm:this.state.max})}}>
-              <Text style={{color:'white', alignSelf:'center', fontFamily:'Segoe UI', letterSpacing:1, fontWeight:'600'}}>FILTER</Text>
+              <Text style={{color:'white', alignSelf:'center', fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'), letterSpacing:1, fontWeight:'600'}}>FILTER</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -641,7 +643,7 @@ class PlaylistItems extends React.Component<Props, any>{
           </View>
           <View style={{flexDirection: 'row', justifyContent:'space-evenly',marginBottom:'3%', marginTop: '1%',}}>
             <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#1DB954', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius:50, shadowColor:'black',shadowRadius:5, shadowOffset:{width:1,height:1}}} onPress={()=>{this.filterPlaylist('time sig.', this.state.max)}}>
-              <Text style={{color:'white', alignSelf:'center', fontFamily:'Segoe UI', letterSpacing:1, fontWeight:'600'}}>FILTER</Text>
+              <Text style={{color:'white', alignSelf:'center', fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'), letterSpacing:1, fontWeight:'600'}}>FILTER</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -656,10 +658,10 @@ class PlaylistItems extends React.Component<Props, any>{
     else if(this.state.errorStatus==true){
       return(
         <View style={{height:'20vh', width:'30vw', justifyContent:'space-between', flexDirection:'column', backgroundColor:'white', borderRadius:20, padding:'1%', position:'absolute',zIndex:10, alignSelf:'center', marginTop:'8%', shadowColor:'black',shadowRadius:10}}>
-          <Text style={{fontSize:16, fontFamily:'Segoe UI', color:'black', fontWeight:'700', letterSpacing:1}}>ERROR RETRIEVING PLAYLIST</Text>
-          <Text style={{fontSize:12, fontFamily:'Segoe UI', color:'black', fontWeight:'500', letterSpacing:1, flex:1, flexDirection:'row', paddingVertical:'2%'}}>Please make sure to 'Copy Playlist Link' and that it links to a valid, public Spotify playlist containing only songs found on Spotify.</Text>
+          <Text style={{fontSize:16, fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'), color:'black', fontWeight:'700', letterSpacing:1}}>ERROR RETRIEVING PLAYLIST</Text>
+          <Text style={{fontSize:12, fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'), color:'black', fontWeight:'500', letterSpacing:1, flex:1, flexDirection:'row', paddingVertical:'2%'}}>Please make sure to 'Copy Playlist Link' and that it links to a valid, public Spotify playlist containing only songs found on Spotify.</Text>
             <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#1DB954', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius:50, shadowColor:'black',shadowRadius:5, shadowOffset:{width:1,height:1}}} onPress={()=>{this.props.navigation.navigate('Spotify Public Playlist Analyzer')}}>
-              <Text style={{color:'white', alignSelf:'center', fontFamily:'Segoe UI', letterSpacing:1, fontWeight:'600'}}>GO BACK</Text>
+              <Text style={{color:'white', alignSelf:'center', fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'), letterSpacing:1, fontWeight:'600'}}>GO BACK</Text>
             </TouchableOpacity>
         </View>
       )
@@ -677,47 +679,71 @@ class PlaylistItems extends React.Component<Props, any>{
             </View>
             <View style={styles.playlistInfo}>
               <Text style={styles.playlistName}>{this.state.Name}</Text>
-              <Text style={styles.playlistUser}>by {this.state.Owner}</Text>
+              <Text style={styles.playlistUser}>{this.state.collectionType == 'artist' ? '' : 'by'} {this.state.Owner}</Text>
               <Text style={styles.playlistDesc}>{this.state.Descrip}</Text>
               <Text style={styles.trackAmount}>{this.state.TrackAmount} Tracks</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.spotifyButton} onPress={()=>{window.open(this.state.playlistUrl, '_blank')}}>
-            <Text style={styles.buttonText}>PLAY ON SPOTIFY</Text>
-          </TouchableOpacity>
+          <Hoverable>
+            {({hovered})=>(<TouchableOpacity style={{ backgroundColor: '#1DB954', justifyContent: 'center', borderRadius: 100, marginTop: '1%', width: 150, height:'4vh', shadowColor:'black', shadowRadius:6, shadowOffset:{width:2,height:1}, opacity: (hovered? .6:1)}} onPress={()=>{window.open(this.state.Url, '_blank')}}>
+              <Text style={styles.buttonText}>PLAY ON SPOTIFY</Text>
+            </TouchableOpacity>)}
+          </Hoverable>
         </View>
         {this.renderFilterSpecs()}
         <View style={styles.optionsContainer}>
           <View style={styles.leftOptions}>
             <Text style={styles.optionsText}>FILTER BY:</Text>
-            <TouchableOpacity style={styles.optionsButton} onPress={()=>{this.setState({showFilterSpecs:'key'})}}>
-              <Text style={styles.navText}>key</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.optionsButton} onPress={()=>{this.setState({showFilterSpecs:'energy'})}}>
-              <Text style={styles.navText}>energy</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.optionsButton} onPress={()=>{this.setState({showFilterSpecs:'bpm'})}}>
-              <Text style={styles.navText}>bpm</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.optionsButton} onPress={()=>{this.setState({showFilterSpecs:'timeSig'})}}>
-              <Text style={styles.navText}>time sig.</Text>
-            </TouchableOpacity>
+            <Hoverable>
+              {({hovered}) => (<TouchableOpacity style={{ padding:5, backgroundColor:'#e5e5e5', width:(isMobile? 60:90), borderRadius:20, opacity : (hovered ? .8:1) }} onPress={()=>{this.setState({showFilterSpecs:'key'})}}>
+                <Text style={styles.navText}>key</Text>
+              </TouchableOpacity>)}
+            </Hoverable>
+            <Hoverable>
+              {({hovered}) => (<TouchableOpacity style={{ padding:5, backgroundColor:'#e5e5e5', width:(isMobile? 60:90), borderRadius:20, opacity : (hovered ? .8:1) }} onPress={()=>{this.setState({showFilterSpecs:'energy'})}}>
+                <Text style={styles.navText}>energy</Text>
+              </TouchableOpacity>)}
+            </Hoverable>
+            <Hoverable>
+              {({hovered}) => (<TouchableOpacity style={{ padding:5, backgroundColor:'#e5e5e5', width:(isMobile? 60:90), borderRadius:20, opacity : (hovered ? .8:1) }} onPress={()=>{this.setState({showFilterSpecs:'bpm'})}}>
+                <Text style={styles.navText}>bpm</Text>
+              </TouchableOpacity>)}
+            </Hoverable>
+            <Hoverable>
+              {({hovered}) => (<TouchableOpacity style={{ padding:5, backgroundColor:'#e5e5e5', width:(isMobile? 60:90), borderRadius:20, opacity : (hovered ? .8:1) }} onPress={()=>{this.setState({showFilterSpecs:'timeSig'})}}>
+                <Text style={styles.navText}>time sig.</Text>
+              </TouchableOpacity>)}
+            </Hoverable>
           </View>
         </View>
         <View style={styles.headBar}>
           <View style={styles.leftBar}>
-            <Text style={styles.barText} onPress={()=>(this.sortPlaylist('name'))}>TRACK ˬ</Text>
+            <Hoverable style={{flex:1}}>
+              {({hovered})=>(<Text style={{ color:'white', fontSize:(isMobile? 9:18), fontWeight: '700', textShadowColor:'white', textShadowRadius:1, flex:1, opacity: (hovered?.8:1) }} onPress={()=>(this.sortPlaylist('name'))}>TRACK ˬ</Text>)}
+            </Hoverable>
           </View>
           <View style={styles.middleBar}>
-            <Text style={styles.barTextArtist} onPress={()=>(this.sortPlaylist('artists'))}>ARTIST ˬ</Text>
-            <Text style={styles.barText}>ALBUM</Text>
+            <Hoverable style={{flex:1}}>
+              {({hovered})=>(<Text style={{ color:'white', fontSize:(isMobile? 9:18), fontWeight: '700', textShadowColor:'white', textShadowRadius:1, flex:1, opacity: (hovered?.8:1) }} onPress={()=>(this.sortPlaylist('artists'))}>ARTIST ˬ</Text>)}
+            </Hoverable>
+            <Hoverable style={{flex:1}}>
+              {({hovered})=>(<Text style={{ color:'white', fontSize:(isMobile? 9:18), fontWeight: '700', textShadowColor:'white', textShadowRadius:1, flex:1, opacity: (hovered?.8:1) }} onPress={()=>(this.sortPlaylist('album'))}>ALBUM ˬ</Text>)}
+            </Hoverable>
           </View>
           <View style={styles.rightBar}>
             <Text style={styles.barText}>DUR.</Text>
-            <Text style={styles.barText} onPress={()=>(this.sortPlaylist('key'))}>KEY ˬ</Text>
-            <Text style={styles.barText} onPress={()=>(this.sortPlaylist('energy'))}>ENERGY ˬ</Text>
-            <Text style={styles.barText} onPress={()=>(this.sortPlaylist('bpm'))}>BPM ˬ</Text>
-            <Text style={styles.barText} onPress={()=>(this.sortPlaylist('timeSig'))}>TIME SIG. ˬ</Text>
+            <Hoverable style={{flex:1}}>
+              {({hovered})=>(<Text style={{ color:'white', fontSize:(isMobile? 9:18), fontWeight: '700', textShadowColor:'white', textShadowRadius:1, flex:1, opacity: (hovered?.8:1) }} onPress={()=>(this.sortPlaylist('key'))}>KEY ˬ</Text>)}
+            </Hoverable>
+            <Hoverable style={{flex:1}}>
+              {({hovered})=>(<Text style={{ color:'white', fontSize:(isMobile? 9:18), fontWeight: '700', textShadowColor:'white', textShadowRadius:1, flex:1, opacity: (hovered?.8:1) }} onPress={()=>(this.sortPlaylist('energy'))}>ENERGY ˬ</Text>)}
+            </Hoverable>
+            <Hoverable style={{flex:1}}>
+              {({hovered})=>(<Text style={{ color:'white', fontSize:(isMobile? 9:18), fontWeight: '700', textShadowColor:'white', textShadowRadius:1, flex:1, opacity: (hovered?.8:1) }} onPress={()=>(this.sortPlaylist('bpm'))}>BPM ˬ</Text>)}
+            </Hoverable>
+            <Hoverable style={{flex:1}}>
+              {({hovered})=>(<Text style={{ color:'white', fontSize:(isMobile? 9:18), fontWeight: '700', textShadowColor:'white', textShadowRadius:1, flex:1, opacity: (hovered?.8:1) }} onPress={()=>(this.sortPlaylist('timeSig'))}>TIME SIG. ˬ</Text>)}
+            </Hoverable>
           </View>
         </View>
 
@@ -731,7 +757,7 @@ class PlaylistItems extends React.Component<Props, any>{
 
 const styles = StyleSheet.create({
   pickerItemStyle:{
-    fontFamily: 'Segoe UI',
+    fontFamily: (isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textShadowColor:'black',
     textShadowRadius:4,
     textShadowOffset:{width:2,height:2},
@@ -770,7 +796,7 @@ const styles = StyleSheet.create({
   },
   filterSpecText:{
     fontSize:12,
-    fontFamily: 'Segoe UI',
+    fontFamily: (isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textShadowColor:'black',
     textShadowRadius:4,
     textShadowOffset:{width:2,height:2},
@@ -778,7 +804,7 @@ const styles = StyleSheet.create({
   },
   filterSpecMinMaxText:{
     fontSize:12,
-    fontFamily: 'Segoe UI',
+    fontFamily: (isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textShadowColor:'black',
     textShadowRadius:4,
     textShadowOffset:{width:2,height:2},
@@ -806,7 +832,7 @@ const styles = StyleSheet.create({
   },
   optionsText: {
     color:'white',
-    fontFamily:'Segoe UI',
+    fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textShadowColor:'white',
     textShadowRadius:1,
     fontWeight:'600',
@@ -820,14 +846,14 @@ const styles = StyleSheet.create({
     padding:5,
     backgroundColor:'#e5e5e5',
     borderRadius:20,
-    fontFamily: 'Segoe UI',
+    fontFamily: (isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textAlign: 'center',
   },
   navText: {
     color:'black',
     fontSize:(isMobile? 12:14),
     textAlign:'center',
-    fontFamily: 'Segoe UI',
+    fontFamily: (isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
   },
   rightOptions: {
     width:'30%',
@@ -840,7 +866,7 @@ const styles = StyleSheet.create({
     backgroundColor:'#e5e5e5',
     width:(isMobile? 60:90),
     borderRadius:20,
-    fontFamily: 'Segoe UI',
+    fontFamily: (isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
   },
   headBar: {
     borderWidth:1,
@@ -919,7 +945,7 @@ const styles = StyleSheet.create({
   songTextArtist: {
     color:'white',
     fontSize:(isMobile? 9:16),
-    fontFamily:'Segoe UI',
+    fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textShadowColor:'black',
     textShadowRadius:4,
     textShadowOffset:{width:2,height:2},
@@ -929,7 +955,7 @@ const styles = StyleSheet.create({
   songTextAlbum: {
     color:'white',
     fontSize:(isMobile? 9:16),
-    fontFamily:'Segoe UI',
+    fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textShadowColor:'black',
     textShadowRadius:4,
     textShadowOffset:{width:2,height:2},
@@ -938,7 +964,7 @@ const styles = StyleSheet.create({
   songText: {
     color:'white',
     fontSize:(isMobile? 9:16),
-    fontFamily:'Segoe UI',
+    fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textShadowColor:'black',
     textShadowRadius:4,
     textShadowOffset:{width:2,height:2},
@@ -947,7 +973,7 @@ const styles = StyleSheet.create({
   songTextTrack: {
     color:'white',
     fontSize:(isMobile? 9:16),
-    fontFamily:'Segoe UI',
+    fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textShadowColor:'black',
     textShadowRadius:4,
     textShadowOffset:{width:2,height:2},
@@ -993,7 +1019,7 @@ const styles = StyleSheet.create({
     color:'white',
     fontSize: 12,
     fontWeight: '600',
-    fontFamily: 'Segoe UI',
+    fontFamily: (isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textAlign: 'center',
     alignSelf: 'center'
   },
@@ -1021,7 +1047,7 @@ const styles = StyleSheet.create({
   playlistName:{
     color: 'white',
     fontSize: 24,
-    fontFamily: 'Segoe UI',
+    fontFamily: (isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textShadowColor:'black',
     textShadowRadius:4,
     textShadowOffset:{width:2,height:2},
@@ -1030,7 +1056,7 @@ const styles = StyleSheet.create({
   playlistUser:{
     color: '#C4C4C4',
     fontSize: 12,
-    fontFamily: 'Segoe UI',
+    fontFamily: (isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textShadowColor:'black',
     textShadowRadius:4,
     textShadowOffset:{width:2,height:2},
@@ -1039,7 +1065,7 @@ const styles = StyleSheet.create({
   playlistDesc:{
     color: 'white',
     fontSize: 14,
-    fontFamily: 'Segoe UI',
+    fontFamily: (isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textShadowColor:'black',
     textShadowRadius:4,
     textShadowOffset:{width:2,height:2},
@@ -1049,7 +1075,7 @@ const styles = StyleSheet.create({
   trackAmount:{
     color: 'white',
     fontSize: 13,
-    fontFamily: 'Segoe UI',
+    fontFamily: (isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
     textShadowColor:'black',
     textShadowRadius:4,
     textShadowOffset:{width:2,height:2},
