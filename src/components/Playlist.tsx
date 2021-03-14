@@ -1,5 +1,5 @@
 import React, {Component, useState} from 'react';
-import { Image, StyleSheet, TextInput, TouchableOpacity, Text, View, ScrollView } from 'react-native';
+import { Image, StyleSheet, TextInput, TouchableOpacity, Text, View, ScrollView, ActivityIndicator } from 'react-native';
 import { GetToken, GetPlaylist, GetPlaylistTracks, GetAlbum, GetAllArtistTracks, GetAudioFeatures } from '../requests/Index';
 import LinearGradient from '../assets/Features/LinearGradient';
 import { isMacOs, isMobile } from "react-device-detect";
@@ -55,7 +55,8 @@ class PlaylistItems extends React.Component<Props, any>{
 
       // Type of track collection (album, playlist, artist)
       collectionType: this.props.route.params.Type,
-      // 
+      // Loading indicator
+      loading: true,
     };
   }
 
@@ -330,6 +331,9 @@ class PlaylistItems extends React.Component<Props, any>{
         )})
 
       });
+      this.setState({
+        loading:false,
+      })
     }catch (err) {
       console.log(err);
     }
@@ -367,48 +371,50 @@ class PlaylistItems extends React.Component<Props, any>{
     this.setState({
       BasicInfo: this.state.TrackDetails.map((song:any,i:any) => {
         return(
-        <TouchableOpacity style={styles.songList} onPress={()=>{
-            this.props.navigation.navigate('Song Analysis', {
-              token: this.state.AuthToken,
-              songID:song.id,
-              artwork: song.artwork,
-              name: song.name,
-              artists: song.artists,
-              album: song.album,
-              duration: song.duration,
-              key: song.key,
-              timeSig: song.timeSig,
-              bpm: song.bpm,
-              popularity: song.popularity,
-              mode: song.mode,
-              // in depth audio features
-              valence: song.valence,
-              liveness: song.liveness,
-              speechiness: song.speechiness,
-              instrumentalness: song.instrumentalness,
-              energy: song.energy,
-              danceability: song.danceability,
-              acousticness: song.acousticness,
-              externalUrl: song.externalUrl,
-            })
-          }} key={i}>
-          <View style={styles.songLeft}>
-          <Image source={{uri: song.artwork}} style={styles.albumArtwork}/>
-            <Text style={styles.songTextTrack}>{song.name}</Text>
-          </View>
-          <View style={styles.songMiddle}>
-            <Text style={styles.songTextArtist}>{song.artists}</Text>
-            <Text style={styles.songTextAlbum}>{song.album}</Text>
-          </View>
-          <View style={styles.songRight}>
-              <Text style={styles.songText}>{song.duration}</Text>
-              <Text style={styles.songText}>{song.key}</Text>
-              <Text style={styles.songText}>{Math.round(song.energy * 10)}</Text>
-              <Text style={styles.songText}>{song.bpm}</Text>
-              <Text style={styles.songText}>{song.timeSig}</Text>
-          </View>
-        </TouchableOpacity>
-      )})
+          <Hoverable>
+          {({hovered})=>(<TouchableOpacity style={{  width:'95%',  overflow:'hidden', opacity: (hovered?.5:1), height: (isMobile? 60:110),  padding:10,  borderBottomWidth:1,  borderBottomColor:'white',  flexDirection:'row',  alignSelf:'center',  justifyContent:'space-between'}} onPress={()=>{
+              this.props.navigation.navigate('Song Analysis', {
+                token: this.state.AuthToken,
+                songID:song.id,
+                artwork: song.artwork,
+                name: song.name,
+                artists: song.artists,
+                album: song.album,
+                duration: song.duration,
+                key: song.key,
+                timeSig: song.timeSig,
+                bpm: song.bpm,
+                popularity: song.popularity,
+                mode: song.mode,
+                // in depth audio features
+                valence: song.valence,
+                liveness: song.liveness,
+                speechiness: song.speechiness,
+                instrumentalness: song.instrumentalness,
+                energy: song.energy,
+                danceability: song.danceability,
+                acousticness: song.acousticness,
+                externalUrl: song.externalUrl,
+              })
+            }} key={i}>
+            <View style={styles.songLeft}>
+            <Image source={{uri: song.artwork}} style={styles.albumArtwork}/>
+              <Text style={styles.songTextTrack}>{song.name}</Text>
+            </View>
+            <View style={styles.songMiddle}>
+              <Text style={styles.songTextArtist}>{song.artists}</Text>
+              <Text style={styles.songTextAlbum}>{song.album}</Text>
+            </View>
+            <View style={styles.songRight}>
+                <Text style={styles.songText}>{song.duration}</Text>
+                <Text style={styles.songText}>{song.key}</Text>
+                <Text style={styles.songText}>{Math.round(song.energy * 10)}</Text>
+                <Text style={styles.songText}>{song.bpm}</Text>
+                <Text style={styles.songText}>{song.timeSig}</Text>
+            </View>
+          </TouchableOpacity>)}
+          </Hoverable>
+        )})
     })
   }
 
@@ -435,48 +441,50 @@ class PlaylistItems extends React.Component<Props, any>{
     this.setState({
       BasicInfo: this.state.TrackDetails.map((song: any,i: any) => {
         return(
-        <TouchableOpacity style={styles.songList} onPress={()=>{
-            this.props.navigation.navigate('Song Analysis', {
-              token: this.state.AuthToken,
-              songID:song.id,
-              artwork: song.artwork,
-              name: song.name,
-              artists: song.artists,
-              album: song.album,
-              duration: song.duration,
-              key: song.key,
-              timeSig: song.timeSig,
-              bpm: song.bpm,
-              popularity: song.popularity,
-              mode: song.mode,
-              // in depth audio features
-              valence: song.valence,
-              liveness: song.liveness,
-              speechiness: song.speechiness,
-              instrumentalness: song.instrumentalness,
-              energy: song.energy,
-              danceability: song.danceability,
-              acousticness: song.acousticness,
-              externalUrl: song.externalUrl,
-            })
-          }} key={i}>
-          <View style={styles.songLeft}>
-          <Image source={{uri: song.artwork}} style={styles.albumArtwork}/>
-            <Text style={styles.songTextTrack}>{song.name}</Text>
-          </View>
-          <View style={styles.songMiddle}>
-            <Text style={styles.songTextArtist}>{song.artists}</Text>
-            <Text style={styles.songTextAlbum}>{song.album}</Text>
-          </View>
-          <View style={styles.songRight}>
-              <Text style={styles.songText}>{song.duration}</Text>
-              <Text style={styles.songText}>{song.key}</Text>
-              <Text style={styles.songText}>{Math.round(song.energy * 10)}</Text>
-              <Text style={styles.songText}>{song.bpm}</Text>
-              <Text style={styles.songText}>{song.timeSig}</Text>
-          </View>
-        </TouchableOpacity>
-      )})
+          <Hoverable>
+          {({hovered})=>(<TouchableOpacity style={{  width:'95%',  overflow:'hidden', opacity: (hovered?.5:1), height: (isMobile? 60:110),  padding:10,  borderBottomWidth:1,  borderBottomColor:'white',  flexDirection:'row',  alignSelf:'center',  justifyContent:'space-between'}} onPress={()=>{
+              this.props.navigation.navigate('Song Analysis', {
+                token: this.state.AuthToken,
+                songID:song.id,
+                artwork: song.artwork,
+                name: song.name,
+                artists: song.artists,
+                album: song.album,
+                duration: song.duration,
+                key: song.key,
+                timeSig: song.timeSig,
+                bpm: song.bpm,
+                popularity: song.popularity,
+                mode: song.mode,
+                // in depth audio features
+                valence: song.valence,
+                liveness: song.liveness,
+                speechiness: song.speechiness,
+                instrumentalness: song.instrumentalness,
+                energy: song.energy,
+                danceability: song.danceability,
+                acousticness: song.acousticness,
+                externalUrl: song.externalUrl,
+              })
+            }} key={i}>
+            <View style={styles.songLeft}>
+            <Image source={{uri: song.artwork}} style={styles.albumArtwork}/>
+              <Text style={styles.songTextTrack}>{song.name}</Text>
+            </View>
+            <View style={styles.songMiddle}>
+              <Text style={styles.songTextArtist}>{song.artists}</Text>
+              <Text style={styles.songTextAlbum}>{song.album}</Text>
+            </View>
+            <View style={styles.songRight}>
+                <Text style={styles.songText}>{song.duration}</Text>
+                <Text style={styles.songText}>{song.key}</Text>
+                <Text style={styles.songText}>{Math.round(song.energy * 10)}</Text>
+                <Text style={styles.songText}>{song.bpm}</Text>
+                <Text style={styles.songText}>{song.timeSig}</Text>
+            </View>
+          </TouchableOpacity>)}
+          </Hoverable>
+        )})
     })
   }
 
@@ -652,14 +660,24 @@ class PlaylistItems extends React.Component<Props, any>{
   }
 
   renderErrorMessage=()=>{
-    if(this.state.errorStatus == false){
+    if(this.state.errorStatus == false && this.state.loading == false){
       return(<View/>)
     }
+    else if(this.state.loading == true){
+      return(
+        <View style={{height:'50vh', width:'50vh', justifyContent:'space-between', borderRadius:20, padding:'1%', position:'absolute',zIndex:10, alignSelf:'center', marginTop:'8%'}}>
+          <ActivityIndicator size="large" color="#00ff00"/>
+        </View>
+      )
+    }
     else if(this.state.errorStatus==true){
+      this.setState({
+        loading:false,
+      })
       return(
         <View style={{height:'20vh', width:'30vw', justifyContent:'space-between', flexDirection:'column', backgroundColor:'white', borderRadius:20, padding:'1%', position:'absolute',zIndex:10, alignSelf:'center', marginTop:'8%', shadowColor:'black',shadowRadius:10}}>
-          <Text style={{fontSize:16, fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'), color:'black', fontWeight:'700', letterSpacing:1}}>ERROR RETRIEVING PLAYLIST</Text>
-          <Text style={{fontSize:12, fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'), color:'black', fontWeight:'500', letterSpacing:1, flex:1, flexDirection:'row', paddingVertical:'2%'}}>Please make sure to 'Copy Playlist Link' and that it links to a valid, public Spotify playlist containing only songs found on Spotify.</Text>
+          <Text style={{fontSize:16, fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'), color:'black', fontWeight:'700', letterSpacing:1, textTransform:'uppercase' }}>ERROR RETRIEVING {this.state.collectionType}</Text>
+          <Text style={{fontSize:12, fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'), color:'black', fontWeight:'500', letterSpacing:1, flex:1, flexDirection:'row', paddingVertical:'2%'}}>Please make sure to 'Copy {this.state.collectionType.toUpperCase()} Link' and that it links to a valid, public Spotify {this.state.collectionType} containing only songs found on Spotify.</Text>
             <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#1DB954', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius:50, shadowColor:'black',shadowRadius:5, shadowOffset:{width:1,height:1}}} onPress={()=>{this.props.navigation.navigate('Spotify Public Playlist Analyzer')}}>
               <Text style={{color:'white', alignSelf:'center', fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'), letterSpacing:1, fontWeight:'600'}}>GO BACK</Text>
             </TouchableOpacity>

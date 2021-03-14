@@ -71,7 +71,8 @@ axios({
       return response.data;
   })
   .catch(err =>{
-      return err.response.status;
+    console.log(err.response);
+    return true;
   })
 ;
 
@@ -97,7 +98,8 @@ axios({
       return response.data;
   })
   .catch(err =>{
-      return err.status;
+    console.log(err.response);
+    return true;
   })
 ;
 
@@ -157,7 +159,7 @@ axios({
   })
   .catch(err =>{
     console.log(err.response);
-      return err.status;
+    return err.status;
   })
 ;
 
@@ -221,6 +223,7 @@ export const GetAllArtistTracks = async(artistId:any, token:any) => {
   }
   catch(err){
     console.log(err);
+    return true;
   }
 }
 
@@ -263,7 +266,7 @@ export const GetTrackAnalysis = (id:any, token:any)=>
       return response.data;
   })
   .catch(err =>{
-      console.log(err, err.response);
-      console.log(token);
+    console.log(err.response);
+    return true;
   })
 ;
