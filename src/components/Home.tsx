@@ -1,4 +1,4 @@
-import React, {Component,} from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity } from 'react-native';
 import trackbar from '../assets/images/trackbar.jpg';
 import playButton from '../assets/images/playButton.jpg';
@@ -25,7 +25,7 @@ class Home extends React.Component<Props, any>{
   }
   
   renderInfo=()=>{
-    if(this.state.infoType=='data'){
+    if(this.state.infoType==='data'){
       return(
           <View style={styles.dataContainer}>
             <Text style={styles.infoHeaderText}>SORT BY</Text>
@@ -56,7 +56,7 @@ class Home extends React.Component<Props, any>{
           </View>
       );
     }
-    else if(this.state.infoType=='features'){
+    else if(this.state.infoType==='features'){
       return(
         <View style={styles.featureContainer}>
           <Text style={styles.infoHeaderText}>FIND THE</Text>
@@ -72,7 +72,7 @@ class Home extends React.Component<Props, any>{
               </View> 
               <View style={styles.rightFeaturesSingleContainer}>
                 <Image source={{uri:emptySongAlbum}} style={{minHeight:40, minWidth: 40, resizeMode:'contain'}}/>
-                <Text style={styles.rightFeaturesText}>MODALITY</Text>
+                <Text style={styles.rightFeaturesText}>PITCH/MOD.</Text>
               </View> 
               <View style={styles.rightFeaturesSingleContainer}>
                 <Image source={{uri:emptySongAlbum}} style={{minHeight:40, minWidth: 40, resizeMode:'contain'}}/>
@@ -109,7 +109,7 @@ class Home extends React.Component<Props, any>{
         </View>
       );
     }
-    else if(this.state.infoType=='analysis'){
+    else if(this.state.infoType==='analysis'){
       return(
         <View style={styles.analysisContainer}>
           <Text style={styles.infoHeaderText}>ANALYZE</Text>

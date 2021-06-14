@@ -1,9 +1,10 @@
-import React, {Component, useState} from 'react';
+import React from 'react';
 import { Image, StyleSheet, TextInput, TouchableOpacity, Text, View, ScrollView, ActivityIndicator } from 'react-native';
 import { GetToken, GetPlaylist, GetPlaylistTracks, GetAlbum, GetAllArtistTracks, GetAudioFeatures } from '../requests/Index';
 import LinearGradient from '../assets/Features/LinearGradient';
 import { isMacOs, isMobile } from "react-device-detect";
 import {Hoverable} from 'react-native-web-hover';
+import TrackInfo from '../assets/Features/TrackInfo';
 
 interface Props{
   navigation:any,
@@ -11,25 +12,66 @@ interface Props{
 }
 
 function determineKey(key: any){
-  if(key == 0)      {return 'C'}
-  else if(key == 1) {return 'C♯ / D♭'}
-  else if(key == 2) {return 'D'}
-  else if(key == 3) {return 'D♯ / E♭'}
-  else if(key == 4) {return 'E'}
-  else if(key == 5) {return 'F'}
-  else if(key == 6) {return 'F♯ / G♭'}
-  else if(key == 7) {return 'G'}
-  else if(key == 8) {return 'G♯ / A♭'}
-  else if(key == 9) {return 'A'}
-  else if(key == 10){return 'A♯ / B♭'}
-  else if(key == 11){return 'B'}
+  if(key === 0)      {return 'C'}
+  else if(key === 1) {return 'D♭'}
+  else if(key === 2) {return 'D'}
+  else if(key === 3) {return 'E♭'}
+  else if(key === 4) {return 'E'}
+  else if(key === 5) {return 'F'}
+  else if(key === 6) {return 'F♯'}
+  else if(key === 7) {return 'G'}
+  else if(key === 8) {return 'A♭'}
+  else if(key === 9) {return 'A'}
+  else if(key === 10){return 'B♭'}
+  else if(key === 11){return 'B'}
+}
+
+function determineKeyWheelNum(keyNum: number, mode: number) {
+  if(keyNum === 0) {
+    return (mode === 1 ? "8B" : "5A");
+  }
+  if(keyNum === 1) {
+    return (mode === 1 ? "3B" : "12A");
+  }
+  if(keyNum === 2) {
+    return (mode === 1 ? "10B" : "7A");
+  }
+  if(keyNum === 3) {
+    return (mode === 1 ? "5B" : "2A");
+  }
+  if(keyNum === 4) {
+    return (mode === 1 ? "12B" : "9A");
+  }
+  if(keyNum === 5) {
+    return (mode === 1 ? "7B" : "4A");
+  }
+  if(keyNum === 6) {
+    return (mode === 1 ? "2B" : "11A");
+  }
+  if(keyNum === 7) {
+    return (mode === 1 ? "9B" : "6A");
+  }
+  if(keyNum === 8) {
+    return (mode === 1 ? "4B" : "1A");
+  }
+  if(keyNum === 9) {
+    return (mode === 1 ? "11B" : "8A");
+  }
+  if(keyNum === 10) {
+    return (mode === 1 ? "6B" : "3A");
+  }
+  if(keyNum === 11) {
+    return (mode === 1 ? "1B" : "10A");
+  }
 }
 
 class PlaylistItems extends React.Component<Props, any>{
   constructor(props: Props | Readonly<Props>) {
     super(props)
+    this.handleOnScroll = this.handleOnScroll.bind(this);
     this.state = {
       BasicInfo: [],
+      OriginalDetails: [],
       Name: '',
       ImageUrl: '',
       Owner: '',
@@ -57,11 +99,28 @@ class PlaylistItems extends React.Component<Props, any>{
       collectionType: this.props.route.params.Type,
       // Loading indicator
       loading: true,
+
+      // Scroll offset for coming back to this page
+      scrollPosition: 0,
+      scrollOffset:0,
     };
   }
 
   componentDidMount() {
     this.renderValues();
+    window.addEventListener('scroll', this.handleOnScroll, false);
+    
+    this.props.navigation.addListener('blur', () => {
+      window.removeEventListener('scroll', this.handleOnScroll, false);
+    });
+    this.props.navigation.addListener('focus', () => {
+      window.addEventListener('scroll', this.handleOnScroll, false);
+      window.scrollTo(0, this.state.scrollPosition)
+    });
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('scroll', this.handleOnScroll, false);
   }
 
   renderValues = async() =>{
@@ -75,59 +134,59 @@ class PlaylistItems extends React.Component<Props, any>{
 
       /* Get all the tracks from the playlist */
       const GetCollection =async()=>{
-        if(this.state.collectionType == 'playlist'){
+        if(this.state.collectionType === 'playlist'){
           return await GetPlaylist(this.state.Uri, this.state.AuthToken);
         }
-        else if(this.state.collectionType == 'album'){
+        else if(this.state.collectionType === 'album'){
           return await GetAlbum(this.state.Uri, this.state.AuthToken);
         }
-        else if(this.state.collectionType == 'artist'){
+        else if(this.state.collectionType === 'artist'){
           return await GetAllArtistTracks(this.state.Uri, this.state.AuthToken);
         }
       }
 
       let collection = await GetCollection();
-      if(collection == true){ this.setState({errorStatus: true})}
+      if(collection === true){ this.setState({errorStatus: true})}
 
       // New Stuff
       this.setState({
-        trackIds: (this.state.collectionType == 'artist' ? collection.tracks : collection.tracks.items).filter((track:any, index=0)=> {  // Use filter since spotify takes down songs that are already in a playlist...
-          if((this.state.collectionType == 'artist' && index >= 100) || (this.state.collectionType == 'playlist'? track.track.name: track.name) == ""){
+        trackIds: (this.state.collectionType === 'artist' ? collection.tracks : collection.tracks.items).filter((track:any, index=0)=> {  // Use filter since spotify takes down songs that are already in a playlist...
+          if((this.state.collectionType === 'artist' && index >= 100) || (this.state.collectionType === 'playlist'? track.track.name: track.name) === ""){
             index++;
             return false;
           }
           index++;
           return true;
         }).map((track:any)=>{
-          return((this.state.collectionType == 'playlist'? track.track.id: track.id));
+          return((this.state.collectionType === 'playlist'? track.track.id: track.id));
         }),
-        TrackSimple: (this.state.collectionType == 'artist' ? collection.tracks : collection.tracks.items).filter((track:any)=> {
-          if((this.state.collectionType == 'playlist'? track.track.name: track.name) == ""){
+        TrackSimple: (this.state.collectionType === 'artist' ? collection.tracks : collection.tracks.items).filter((track:any)=> {
+          if((this.state.collectionType === 'playlist'? track.track.name: track.name) === ""){
             return false;
           }
           return true;
         }).map((track:any)=>{
           
-          let minutes = Math.floor((this.state.collectionType == 'playlist'? track.track.duration_ms : track.duration_ms)/60000);
-          let seconds = Math.round(((this.state.collectionType == 'playlist' ? track.track.duration_ms : track.duration_ms) - (60000*minutes))/1000);
+          let minutes = Math.floor((this.state.collectionType === 'playlist'? track.track.duration_ms : track.duration_ms)/60000);
+          let seconds = Math.round(((this.state.collectionType === 'playlist' ? track.track.duration_ms : track.duration_ms) - (60000*minutes))/1000);
           
           let dur = `${minutes}:${seconds}`;
           if(seconds<10){dur = `${minutes}:0${seconds}`;}
 
-          let allArtists = (this.state.collectionType == 'playlist'? track.track.artists: track.artists).map((artist:any)=>{return artist.name});
+          let allArtists = (this.state.collectionType === 'playlist'? track.track.artists: track.artists).map((artist:any)=>{return artist.name});
           allArtists=allArtists.join(', ');
           return({
-            artwork: (this.state.collectionType == 'playlist' ? track.track.album.images[1] : this.state.collectionType == 'artist' ? track.artwork[1] : collection.images[1]).url,
-            name: (this.state.collectionType == 'playlist'? track.track : track).name,
+            artwork: (this.state.collectionType === 'playlist' ? track.track.album.images[1] : this.state.collectionType === 'artist' ? track.artwork[1] : collection.images[1]).url,
+            name: (this.state.collectionType === 'playlist'? track.track : track).name,
             artists: allArtists,
-            album: (this.state.collectionType == 'playlist' ? track.track.album.name : this.state.collectionType == 'artist' ? track.album_name : collection.name),
+            album: (this.state.collectionType === 'playlist' ? track.track.album.name : this.state.collectionType === 'artist' ? track.album_name : collection.name),
             duration: dur,
-            id: (this.state.collectionType == 'playlist'? track.track : track).id,
-            popularity: (this.state.collectionType == 'playlist'? track.track : this.state.collectionType == 'artist'? track : collection).popularity,
-            externalUrl: (this.state.collectionType == 'playlist'? track.track : track).external_urls.spotify,
+            id: (this.state.collectionType === 'playlist'? track.track : track).id,
+            popularity: (this.state.collectionType === 'playlist'? track.track : this.state.collectionType === 'artist'? track : collection).popularity,
+            externalUrl: (this.state.collectionType === 'playlist'? track.track : track).external_urls.spotify,
           });
         }),
-        TrackAmount: (this.state.collectionType == 'artist'? collection.total : collection.tracks.total),
+        TrackAmount: (this.state.collectionType === 'artist'? collection.total : collection.tracks.total),
         Url: collection.external_urls.spotify, 
       })
       this.setState({
@@ -141,7 +200,7 @@ class PlaylistItems extends React.Component<Props, any>{
         TrackFeatures: features.audio_features.map((songFeatures:any)=>{
           let keyString = determineKey(songFeatures.key);
           let modality = 'Major';
-          if(songFeatures.mode == 0){modality = 'Minor';}
+          if(songFeatures.mode === 0){modality = 'Minor';}
           return({
             id: songFeatures.id,
             bpm: Math.round(songFeatures.tempo),
@@ -150,6 +209,7 @@ class PlaylistItems extends React.Component<Props, any>{
             energy: songFeatures.energy,
             timeSig: songFeatures.time_signature,
             mode: modality,
+            keyWheelNum: determineKeyWheelNum(songFeatures.key, songFeatures.mode),
             // even more features
             valence: songFeatures.valence,
             liveness: songFeatures.liveness,
@@ -164,26 +224,26 @@ class PlaylistItems extends React.Component<Props, any>{
       for(var i = 0; i<iterations; i++){
         /* Get all the tracks from the playlist */
         let newCollection = [];
-        if(this.state.collectionType == 'playlist'){
+        if(this.state.collectionType === 'playlist'){
           newCollection = await GetPlaylistTracks(this.state.Uri, this.state.AuthToken, 100*(1+i));
         }
         /* Setting retrieved data to this.state.trackIds */
         this.setState({
-          trackIds: (this.state.collectionType == 'artist'? collection.tracks : newCollection.items).filter((track:any, index=100*(1+i))=> {
-            if((this.state.collectionType == 'artist' && (index < 100*(1+i) || index >= collection.total || index >= 100*(2+i))) || (this.state.collectionType == 'playlist'? track.track.name: track.name) == ""){
+          trackIds: (this.state.collectionType === 'artist'? collection.tracks : newCollection.items).filter((track:any, index=100*(1+i))=> {
+            if((this.state.collectionType === 'artist' && (index < 100*(1+i) || index >= collection.total || index >= 100*(2+i))) || (this.state.collectionType === 'playlist'? track.track.name: track.name) === ""){
               index++;
               return false;
             }
             index++;
             return true;
           }).map((track:any)=>{
-            return(this.state.collectionType == 'artist'? track.id : track.track.id);
+            return(this.state.collectionType === 'artist'? track.id : track.track.id);
           }),
         });
-        if(this.state.collectionType == 'playlist'){
+        if(this.state.collectionType === 'playlist'){
           this.setState({
             TrackSimple: this.state.TrackSimple.concat(newCollection.items.filter((track:any)=> {
-              if(track.track.name == ""){
+              if(track.track.name === ""){
                 return false;
               }
               return true;
@@ -218,7 +278,7 @@ class PlaylistItems extends React.Component<Props, any>{
           TrackFeatures: this.state.TrackFeatures.concat(newFeatures.audio_features.map((songFeatures:any)=>{
             let keyString = determineKey(songFeatures.key);
             let modality = 'Major';
-            if(songFeatures.mode == 0){modality = 'Minor';}
+            if(songFeatures.mode === 0){modality = 'Minor';}
             return({
               id: songFeatures.id,
               bpm: Math.round(songFeatures.tempo),
@@ -227,6 +287,7 @@ class PlaylistItems extends React.Component<Props, any>{
               energy: songFeatures.energy,
               timeSig: songFeatures.time_signature,
               mode: modality,
+              keyWheelNum: determineKeyWheelNum(songFeatures.key, songFeatures.mode),
               // even more features
               valence: songFeatures.valence,
               liveness: songFeatures.liveness,
@@ -248,17 +309,18 @@ class PlaylistItems extends React.Component<Props, any>{
         })
       }
       this.setState({
-        TrackDetails:merged
+        TrackDetails:merged,
+        OriginalDetails: merged,
       })
 
-        if(this.state.collectionType == 'playlist'){
+        if(this.state.collectionType === 'playlist'){
           this.setState({
             Owner: collection.owner.display_name,
             TrackAmount: collection.tracks.total,
             Descrip: collection.description.replace(/&#x27;|&quot;/gi, "'"),
           })
         }
-        else if(this.state.collectionType == 'album'){
+        else if(this.state.collectionType === 'album'){
           let allOwners = collection.artists.map((artist:any)=>{return artist.name});
           allOwners=allOwners.join(', ');
 
@@ -268,7 +330,7 @@ class PlaylistItems extends React.Component<Props, any>{
             Descrip: collection.label,
           })
         }
-        else if(this.state.collectionType == 'artist'){
+        else if(this.state.collectionType === 'artist'){
           let description = collection.genres.map((genre:any)=>{return genre});
           description=description.join(', ');
 
@@ -280,55 +342,13 @@ class PlaylistItems extends React.Component<Props, any>{
         }
 
       this.setState({
-        Name: (this.state.collectionType == 'artist' ? collection.artist : collection.name),
+        Name: (this.state.collectionType === 'artist' ? collection.artist : collection.name),
         ImageUrl: collection.images[0].url,
-
-        BasicInfo: this.state.TrackDetails.map((song:any, i:any) => {
+        BasicInfo: this.state.TrackDetails.map((song:any ) => {
           return(
-          <Hoverable>
-          {({hovered})=>(<TouchableOpacity style={{  width:'95%',  overflow:'hidden', opacity: (hovered?.5:1), height: (isMobile? 60:110),  padding:10,  borderBottomWidth:1,  borderBottomColor:'white',  flexDirection:'row',  alignSelf:'center',  justifyContent:'space-between'}} onPress={()=>{
-              this.props.navigation.navigate('Song Analysis', {
-                token: this.state.AuthToken,
-                songID:song.id,
-                artwork: song.artwork,
-                name: song.name,
-                artists: song.artists,
-                album: song.album,
-                duration: song.duration,
-                key: song.key,
-                timeSig: song.timeSig,
-                bpm: song.bpm,
-                popularity: song.popularity,
-                mode: song.mode,
-                // in depth audio features
-                valence: song.valence,
-                liveness: song.liveness,
-                speechiness: song.speechiness,
-                instrumentalness: song.instrumentalness,
-                energy: song.energy,
-                danceability: song.danceability,
-                acousticness: song.acousticness,
-                externalUrl: song.externalUrl,
-              })
-            }} key={i}>
-            <View style={styles.songLeft}>
-            <Image source={{uri: song.artwork}} style={styles.albumArtwork}/>
-              <Text style={styles.songTextTrack}>{song.name}</Text>
-            </View>
-            <View style={styles.songMiddle}>
-              <Text style={styles.songTextArtist}>{song.artists}</Text>
-              <Text style={styles.songTextAlbum}>{song.album}</Text>
-            </View>
-            <View style={styles.songRight}>
-                <Text style={styles.songText}>{song.duration}</Text>
-                <Text style={styles.songText}>{song.key}</Text>
-                <Text style={styles.songText}>{Math.round(song.energy * 10)}</Text>
-                <Text style={styles.songText}>{song.bpm}</Text>
-                <Text style={styles.songText}>{song.timeSig}</Text>
-            </View>
-          </TouchableOpacity>)}
-          </Hoverable>
-        )})
+            <TrackInfo navigation={this.props.navigation} token={this.state.AuthToken} song={song} songs={this.state.OriginalDetails}/>
+        )}),
+
 
       });
       this.setState({
@@ -339,168 +359,96 @@ class PlaylistItems extends React.Component<Props, any>{
     }
   }
 
+  resetPlaylist = async() => {
+    this.setState({
+      TrackDetails: await this.state.OriginalDetails,
+    })
+    this.setState({
+      BasicInfo: this.state.TrackDetails.map((song:any) => {
+        return(
+          <TrackInfo navigation={this.props.navigation} token={this.state.AuthToken} song={song} songs={this.state.OriginalDetails}/>
+        )})
+    })
+  }
+
   sortPlaylist = (sortMethod: string) => {
-    if(sortMethod == 'bpm'){
+    if(sortMethod === 'bpm'){
     this.setState({
       TrackDetails: this.state.TrackDetails.sort((a:any,b:any) => (a.bpm > b.bpm) ? 1 : -1)
     })}
-    else if(sortMethod == 'key'){
+    else if(sortMethod === 'key'){
     this.setState({
-      TrackDetails: this.state.TrackDetails.sort((a:any,b:any) => (a.keyNum > b.keyNum) ? 1 : -1)
+      TrackDetails: this.state.TrackDetails.sort((a:any,b:any) => (a.keyWheelNum > b.keyWheelNum) ? 1 : -1)
     })}
-    else if(sortMethod == 'energy'){
+    else if(sortMethod === 'energy'){
     this.setState({
       TrackDetails: this.state.TrackDetails.sort((a:any,b:any) => (a.energy > b.energy) ? 1 : -1)
     })}
-    else if(sortMethod == 'name'){
+    else if(sortMethod === 'name'){
     this.setState({
       TrackDetails: this.state.TrackDetails.sort((a:any,b:any) => (a.name > b.name) ? 1 : -1)
     })}
-    else if(sortMethod == 'timeSig'){
+    else if(sortMethod === 'timeSig'){
     this.setState({
       TrackDetails: this.state.TrackDetails.sort((a:any,b:any) => (a.timeSig > b.timeSig) ? 1 : -1)
     })}
-    else if(sortMethod == 'artists'){
+    else if(sortMethod === 'artists'){
     this.setState({
       TrackDetails: this.state.TrackDetails.sort((a:any,b:any) => (a.artists > b.artists) ? 1 : -1)
     })}
-    else if(sortMethod == 'album'){
+    else if(sortMethod === 'album'){
       this.setState({
         TrackDetails: this.state.TrackDetails.sort((a:any,b:any) => (a.album > b.album) ? 1 : -1)
       })}
     this.setState({
-      BasicInfo: this.state.TrackDetails.map((song:any,i:any) => {
+      BasicInfo: this.state.TrackDetails.map((song:any) => {
         return(
-          <Hoverable>
-          {({hovered})=>(<TouchableOpacity style={{  width:'95%',  overflow:'hidden', opacity: (hovered?.5:1), height: (isMobile? 60:110),  padding:10,  borderBottomWidth:1,  borderBottomColor:'white',  flexDirection:'row',  alignSelf:'center',  justifyContent:'space-between'}} onPress={()=>{
-              this.props.navigation.navigate('Song Analysis', {
-                token: this.state.AuthToken,
-                songID:song.id,
-                artwork: song.artwork,
-                name: song.name,
-                artists: song.artists,
-                album: song.album,
-                duration: song.duration,
-                key: song.key,
-                timeSig: song.timeSig,
-                bpm: song.bpm,
-                popularity: song.popularity,
-                mode: song.mode,
-                // in depth audio features
-                valence: song.valence,
-                liveness: song.liveness,
-                speechiness: song.speechiness,
-                instrumentalness: song.instrumentalness,
-                energy: song.energy,
-                danceability: song.danceability,
-                acousticness: song.acousticness,
-                externalUrl: song.externalUrl,
-              })
-            }} key={i}>
-            <View style={styles.songLeft}>
-            <Image source={{uri: song.artwork}} style={styles.albumArtwork}/>
-              <Text style={styles.songTextTrack}>{song.name}</Text>
-            </View>
-            <View style={styles.songMiddle}>
-              <Text style={styles.songTextArtist}>{song.artists}</Text>
-              <Text style={styles.songTextAlbum}>{song.album}</Text>
-            </View>
-            <View style={styles.songRight}>
-                <Text style={styles.songText}>{song.duration}</Text>
-                <Text style={styles.songText}>{song.key}</Text>
-                <Text style={styles.songText}>{Math.round(song.energy * 10)}</Text>
-                <Text style={styles.songText}>{song.bpm}</Text>
-                <Text style={styles.songText}>{song.timeSig}</Text>
-            </View>
-          </TouchableOpacity>)}
-          </Hoverable>
+          <TrackInfo navigation={this.props.navigation} token={this.state.AuthToken} song={song} songs={this.state.OriginalDetails}/>
         )})
     })
   }
 
   filterPlaylist = async (filterMethod:any, params:any) => {
     let newArray = [];
-    if(filterMethod == 'key'){
-        newArray =  this.state.TrackDetails.filter((track: { keyNum: any; })=> (track.keyNum==params))
+    if(filterMethod === 'key'){
+        newArray =  this.state.TrackDetails.filter((track: { keyNum: any; })=> (track.keyNum===params))
     }
-    else if(filterMethod == 'energy'){
+    else if(filterMethod === 'energy'){
         newArray =  this.state.TrackDetails.filter((track: { energy: any; })=> ((Math.round(track.energy * 10) >= params.minEnergy) && Math.round(track.energy * 10) <= params.maxEnergy))
     }
-    else if(filterMethod == 'time sig.'){
-        newArray = this.state.TrackDetails.filter((track: { timeSig: any; })=> (track.timeSig==params))
+    else if(filterMethod === 'time sig.'){
+        newArray = this.state.TrackDetails.filter((track: { timeSig: any; })=> (track.timeSig===params))
     }
-    else if(filterMethod == 'bpm'){
+    else if(filterMethod === 'bpm'){
         newArray =  this.state.TrackDetails.filter((track: { bpm: any; })=> (track.bpm >= params.minBpm && track.bpm <= params.maxBpm))
     }
-    else if(filterMethod == 'artists'){
-        newArray =  this.state.TrackDetails.filter((track: { artists: any; })=> (track.artists==params.artists))
+    else if(filterMethod === 'artists'){
+        newArray =  this.state.TrackDetails.filter((track: { artists: any; })=> (track.artists===params.artists))
     }
     this.setState({
       TrackDetails:await newArray
     })
     this.setState({
-      BasicInfo: this.state.TrackDetails.map((song: any,i: any) => {
+      BasicInfo: this.state.TrackDetails.map((song: any) => {
         return(
-          <Hoverable>
-          {({hovered})=>(<TouchableOpacity style={{  width:'95%',  overflow:'hidden', opacity: (hovered?.5:1), height: (isMobile? 60:110),  padding:10,  borderBottomWidth:1,  borderBottomColor:'white',  flexDirection:'row',  alignSelf:'center',  justifyContent:'space-between'}} onPress={()=>{
-              this.props.navigation.navigate('Song Analysis', {
-                token: this.state.AuthToken,
-                songID:song.id,
-                artwork: song.artwork,
-                name: song.name,
-                artists: song.artists,
-                album: song.album,
-                duration: song.duration,
-                key: song.key,
-                timeSig: song.timeSig,
-                bpm: song.bpm,
-                popularity: song.popularity,
-                mode: song.mode,
-                // in depth audio features
-                valence: song.valence,
-                liveness: song.liveness,
-                speechiness: song.speechiness,
-                instrumentalness: song.instrumentalness,
-                energy: song.energy,
-                danceability: song.danceability,
-                acousticness: song.acousticness,
-                externalUrl: song.externalUrl,
-              })
-            }} key={i}>
-            <View style={styles.songLeft}>
-            <Image source={{uri: song.artwork}} style={styles.albumArtwork}/>
-              <Text style={styles.songTextTrack}>{song.name}</Text>
-            </View>
-            <View style={styles.songMiddle}>
-              <Text style={styles.songTextArtist}>{song.artists}</Text>
-              <Text style={styles.songTextAlbum}>{song.album}</Text>
-            </View>
-            <View style={styles.songRight}>
-                <Text style={styles.songText}>{song.duration}</Text>
-                <Text style={styles.songText}>{song.key}</Text>
-                <Text style={styles.songText}>{Math.round(song.energy * 10)}</Text>
-                <Text style={styles.songText}>{song.bpm}</Text>
-                <Text style={styles.songText}>{song.timeSig}</Text>
-            </View>
-          </TouchableOpacity>)}
-          </Hoverable>
+          <TrackInfo navigation={this.props.navigation} token={this.state.AuthToken} song={song} songs={this.state.OriginalDetails} />
         )})
     })
   }
 
   renderFilterSpecs=()=>{
-    if(this.state.showFilterSpecs == 'initial'){
+    if(this.state.showFilterSpecs === 'initial'){
       return(
         <View></View>
       );}
-    else if (this.state.showFilterSpecs == 'key'){
+    else if (this.state.showFilterSpecs === 'key'){
       return(
         <View style={styles.filterSpecContainer}>
           <View style={{flexDirection: 'row', justifyContent:'space-between', width:'90%', alignSelf:'center'}}>
             <TouchableOpacity style={{alignSelf:'center'}} onPress={()=>{this.setState({showFilterSpecs:'initial'})}}>
               <Text style={styles.filterSpecText}> X </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#8F8F8F', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius: 50}} onPress={()=>{this.renderValues()}}>
+            <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#8F8F8F', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius: 50}} onPress={()=>(this.resetPlaylist())}>
               <Text style={styles.filterSpecText}>RESET</Text>
             </TouchableOpacity>
           </View>
@@ -553,14 +501,14 @@ class PlaylistItems extends React.Component<Props, any>{
         </View>
       )
     }
-    else if (this.state.showFilterSpecs == 'energy'){
+    else if (this.state.showFilterSpecs === 'energy'){
       return(
         <View style={styles.filterSpecInputContainer}>
           <View style={{flexDirection: 'row', justifyContent:'space-between', width:'90%', alignSelf:'center'}}>
             <TouchableOpacity style={{alignSelf:'center'}} onPress={()=>{this.setState({showFilterSpecs:'initial'})}}>
               <Text style={styles.filterSpecText}> X </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#8F8F8F', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius: 50}} onPress={()=>{this.renderValues()}}>
+            <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#8F8F8F', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius: 50}} onPress={()=>{this.resetPlaylist()}}>
               <Text style={styles.filterSpecText}>RESET</Text>
             </TouchableOpacity>
           </View>
@@ -592,14 +540,14 @@ class PlaylistItems extends React.Component<Props, any>{
         </View>
       )
     }
-    else if (this.state.showFilterSpecs == 'bpm'){
+    else if (this.state.showFilterSpecs === 'bpm'){
       return(
         <View style={styles.filterSpecInputContainer}>
           <View style={{flexDirection: 'row', justifyContent:'space-between', width:'90%', alignSelf:'center'}}>
             <TouchableOpacity style={{alignSelf:'center'}} onPress={()=>{this.setState({showFilterSpecs:'initial'})}}>
               <Text style={styles.filterSpecText}> X </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#8F8F8F', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius: 50}} onPress={()=>{this.renderValues()}}>
+            <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#8F8F8F', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius: 50}} onPress={()=>{this.resetPlaylist()}}>
               <Text style={styles.filterSpecText}>RESET</Text>
             </TouchableOpacity>
           </View>
@@ -629,14 +577,14 @@ class PlaylistItems extends React.Component<Props, any>{
         </View>
       )
     }
-    else if (this.state.showFilterSpecs == 'timeSig'){
+    else if (this.state.showFilterSpecs === 'timeSig'){
       return(
         <View style={styles.filterSpecInputContainer}>
           <View style={{flexDirection: 'row', justifyContent:'space-between', width:'90%', alignSelf:'center'}}>
             <TouchableOpacity style={{alignSelf:'center'}} onPress={()=>{this.setState({showFilterSpecs:'initial'})}}>
               <Text style={styles.filterSpecText}> X </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#8F8F8F', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius: 50}} onPress={()=>{this.renderValues()}}>
+            <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#8F8F8F', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius: 50}} onPress={()=>{this.resetPlaylist()}}>
               <Text style={styles.filterSpecText}>RESET</Text>
             </TouchableOpacity>
           </View>
@@ -660,10 +608,10 @@ class PlaylistItems extends React.Component<Props, any>{
   }
 
   renderErrorMessage=()=>{
-    if(this.state.errorStatus == false && this.state.loading == false){
+    if(this.state.errorStatus === false && this.state.loading === false){
       return(<View/>)
     }
-    else if(this.state.errorStatus==true){
+    else if(this.state.errorStatus===true){
       return(
         <View style={{height:'20vh', width:'30vw', justifyContent:'space-between', flexDirection:'column', backgroundColor:'white', borderRadius:20, padding:'1%', position:'absolute',zIndex:10, alignSelf:'center', marginTop:'8%', shadowColor:'black',shadowRadius:10}}>
           <Text style={{fontSize:16, fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'), color:'black', fontWeight:'700', letterSpacing:1, textTransform:'uppercase' }}>ERROR RETRIEVING {this.state.collectionType}</Text>
@@ -674,7 +622,7 @@ class PlaylistItems extends React.Component<Props, any>{
         </View>
       )
     }
-    else if(this.state.loading == true){
+    else if(this.state.loading === true){
       return(
         <View style={{height:'50vh', width:'50vh', justifyContent:'space-between', borderRadius:20, padding:'1%', position:'absolute',zIndex:10, alignSelf:'center', marginTop:'8%'}}>
           <ActivityIndicator size="large" color="#00ff00"/>
@@ -683,9 +631,24 @@ class PlaylistItems extends React.Component<Props, any>{
     }
   }
 
+  // setPreviousScrollPosition=()=> {
+  //   this.props.navigation.addListener('focus', () => {
+  //     setTimeout(()=> {
+  //       this.setState({ scrollOffset: this.state.scrollPosition})
+  //     }, 500)
+  //   })
+  //   console.log(this.state.scrollPosition)
+  // }
+
+  handleOnScroll = () => {
+    this.setState({scrollPosition:window.pageYOffset});
+  }
+
   render(){return (
     <LinearGradient  colors = {['#353535', '#494949','#252525']} style={{minHeight:'100vh'}}>
-      <ScrollView style = {{paddingBottom:'3%'}}>
+      <ScrollView 
+      // contentOffset = {{x:0, y: this.state.scrollOffset}}
+      style = {{paddingBottom:'3%'}} >
         {this.renderErrorMessage()}
         <View style={styles.headerContainer}>
           <View style={styles.playlistContainer}>
@@ -694,13 +657,13 @@ class PlaylistItems extends React.Component<Props, any>{
             </View>
             <View style={styles.playlistInfo}>
               <Text style={styles.playlistName}>{this.state.Name}</Text>
-              <Text style={styles.playlistUser}>{this.state.collectionType == 'artist' ? '' : 'by'} {this.state.Owner}</Text>
+              <Text style={styles.playlistUser}>{this.state.collectionType === 'artist' ? '' : 'by'} {this.state.Owner}</Text>
               <Text style={styles.playlistDesc}>{this.state.Descrip}</Text>
               <Text style={styles.trackAmount}>{this.state.TrackAmount} Tracks</Text>
             </View>
           </View>
           <Hoverable>
-            {({hovered})=>(<TouchableOpacity style={{ backgroundColor: '#1DB954', justifyContent: 'center', borderRadius: 100, marginTop: '1%', width: 150, height:'4vh', shadowColor:'black', shadowRadius:6, shadowOffset:{width:2,height:1}, opacity: (hovered? .6:1)}} onPress={()=>{window.open(this.state.Url, '_blank')}}>
+            {({hovered})=>(<TouchableOpacity style={{ backgroundColor: '#1DB954', justifyContent: 'center', borderRadius: 100, marginTop: '1%', width: 150, height:'4vh', shadowColor:'black', shadowRadius:6, shadowOffset:{width:2,height:1}, opacity: (hovered? .6:1)}} onPress={()=>{console.log(this.state.scrollPosition);window.open(this.state.Url, '_blank')}}>
               <Text style={styles.buttonText}>PLAY ON SPOTIFY</Text>
             </TouchableOpacity>)}
           </Hoverable>

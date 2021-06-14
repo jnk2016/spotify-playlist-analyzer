@@ -1,13 +1,43 @@
-import React, {Component} from 'react';
-import { Image, StyleSheet, TouchableOpacity, Text, View, ImageBackground} from 'react-native';
+import React from 'react';
+import { Image, StyleSheet, TouchableOpacity, Text, View, ImageBackground, FlatList, ScrollView } from 'react-native';
 import {PieChart} from 'react-minimal-pie-chart';
 import { GetTrackAnalysis} from '../requests/Index';
 import { isMacOs, isMobile } from "react-device-detect";
 import {Hoverable} from 'react-native-web-hover';
+import TrackInfo from '../assets/Features/TrackInfo';
+import LinearGradient from '../assets/Features/LinearGradient';
+import {rgba} from 'polished';
 
 interface Props{
   navigation:any,
   route: any
+}
+
+function determineSimilarKeys(keyWheelNum: string) {
+  var keys: string[] = [];
+
+  var num = parseInt(keyWheelNum);
+  var numAbove = (num === 12 ? 1 : num+1);
+  var numBelow = (num === 1 ? 12 : num-1);
+
+  var letter = keyWheelNum.substring(keyWheelNum.length-1, keyWheelNum.length);
+  var oppLetter = (letter === "A" ? "B" : "A");
+
+  var minor = (letter === "A" ? true : false);
+
+  // Energy Boost Rule:                   +1 (same letter)
+  keys.push(`${numAbove}${letter}`);
+
+  // Lower Energy/Go Deeper Rule:         -1 (same letter)
+  keys.push(`${numBelow}${letter}`);
+
+  // Relative Major - minor Switch Rule:  change letter (same number)
+  keys.push(`${num}${oppLetter}`);
+  
+  // Sub Dominant Key Rule:               change letter (minor: -1 | major: +1)
+  keys.push(`${(minor ? numBelow : numAbove)}${oppLetter}`);
+
+  return keys;
 }
 
 class Song extends React.Component<Props, any>{
@@ -27,6 +57,7 @@ class Song extends React.Component<Props, any>{
       key: this.props.route.params.key,
       bars: '', // Not included in route params
       mode: this.props.route.params.mode,
+      keyWheelNum: this.props.route.params.keyWheelNum,
       beats: '',  // Not included in route params
       timeSig: this.props.route.params.timeSig,
       sections: '', // Not included in route params
@@ -41,11 +72,22 @@ class Song extends React.Component<Props, any>{
       danceability: this.props.route.params.danceability,
       acousticness: this.props.route.params.acousticness,
       externalUrl: this.props.route.params.externalUrl,
+
+      /* Similar Tracks (via Mixing in key using Camelot Wheel) */
+      songsInPlaylist: this.props.route.params.songs,
+      similarTracks: [],
     };
   }
 
   componentDidMount() {
     this.renderValues();
+    this.props.navigation.addListener('blur', () => {
+      window.removeEventListener('scroll', this.handleOnScroll, false);
+    });
+    this.props.navigation.addListener('focus', () => {
+      window.addEventListener('scroll', this.handleOnScroll, false);
+      window.scrollTo(0, this.state.scrollPosition)
+    });
   }
 
   renderValues = async() =>{
@@ -60,20 +102,62 @@ class Song extends React.Component<Props, any>{
         beats: trackAnalysis.beats.length,
         sections: trackAnalysis.sections.length,
         segments: trackAnalysis.segments.length,
-      })
+      });
+      await this.getSimilarTracks();
+
     }catch (err) {
       console.log(err);
-    }
+    };
   }
 
-  render() {return (
-    <ImageBackground source = {{uri:this.state.artwork}} style = {styles.backgroundimage} blurRadius= {200}>
-        <Hoverable>
-          {({hovered})=>(<TouchableOpacity style={{ backgroundColor: '#1DB954', justifyContent:'center', borderRadius: 100, width: 150, height:'4vh', alignSelf: 'flex-end', marginRight: '2%', marginBottom: '-1%', marginTop: 80, shadowColor:'black', shadowRadius:6, shadowOffset:{width:2,height:1},zIndex:1, opacity: (hovered? .6:1)}} onPress={()=>{window.open(this.state.externalUrl,'_blank')}}>
-            <Text style={styles.buttonText}>PLAY ON SPOTIFY</Text>
-          </TouchableOpacity>)}
-        </Hoverable>
-        <View style={{justifyContent: 'center'}}>
+  getSimilarTracks = async() => {
+    const similarKeys = determineSimilarKeys(this.state.keyWheelNum);
+    let similarTrackDetails = this.state.songsInPlaylist.filter((track: any)=> similarKeys.includes(track.keyWheelNum));
+
+    similarTrackDetails = similarTrackDetails.sort((a:any,b:any) => (a.bpm > b.bpm) ? 1 : -1)
+    similarTrackDetails = similarTrackDetails.sort((a:any,b:any) => (a.keyWheelNum > b.keyWheelNum) ? 1 : -1)
+
+    this.setState({
+      similarTracks: await similarTrackDetails
+    });
+  }
+
+  handleOnScroll = () => {
+    this.setState({scrollPosition:window.pageYOffset});
+  }
+
+  render() {
+    return (
+    <ScrollView style = {{ flex:1 }}>
+      <ImageBackground source = {{uri:this.state.artwork}} blurRadius= {200}>
+        <View style = {{flex:1, flexDirection:'row', marginLeft:(isMobile? 0:'35vw'),}}>
+          <View style={styles.songInfoContainer}>
+            <Text style={styles.songTitle}>{this.state.name}</Text>
+            <Text style={styles.songArtist}>{this.state.artists}</Text>
+            <Text style={styles.songTypeYear}>{this.state.album}</Text>
+          </View>
+          <Hoverable>
+            {({hovered})=>(<TouchableOpacity 
+            style={{ 
+              backgroundColor: '#1DB954', 
+              justifyContent:'center', 
+              borderRadius: 100, 
+              width: 150, 
+              height:'4vh', 
+              alignSelf: 'flex-end', 
+              marginRight: '1vw',
+              marginTop: '1vh', 
+              shadowColor:'black', 
+              shadowRadius:6, 
+              shadowOffset:{width:2,height:1}, 
+              opacity: (hovered? .6:1)}
+            } 
+            onPress={()=>{window.open(this.state.externalUrl,'_blank')}}>
+              <Text style={styles.buttonText}>PLAY ON SPOTIFY</Text>
+            </TouchableOpacity>)}
+          </Hoverable>
+        </View>
+        <View style={{justifyContent: 'center', marginVertical:'1%', paddingBottom: (isMobile? 230 : 0)}}>
           <View style={{shadowColor:'black',shadowRadius:70,  height: (isMobile? 341:500), width: (isMobile? 341:500), alignSelf: 'center', borderRadius: 500, zIndex:3,}}>
             <Image source={{uri: this.state.artwork}} style={{resizeMode:'contain', height: (isMobile? 341:500), width: (isMobile? 341:500), alignSelf: 'center', borderRadius: 500, zIndex:3,}} blurRadius={20}/>
           </View>
@@ -175,7 +259,7 @@ class Song extends React.Component<Props, any>{
             </View>
             <View style={styles.line}>
               <View style={styles.featureContainer}>
-                <Text style={styles.statTextLeft}>{this.state.key}</Text>
+                <Text style={styles.statTextLeft}>{this.state.keyWheelNum}</Text>
                 <Text style={styles.statDescText}>KEY</Text>
               </View>
               <View style={styles.featureContainer}>
@@ -185,8 +269,8 @@ class Song extends React.Component<Props, any>{
             </View>
             <View style={styles.line}>
               <View style={styles.featureContainer}>
-                <Text style={styles.statTextLeft}>{this.state.mode}</Text>
-                <Text style={styles.statDescText}>MODALITY</Text>
+                <Text style={styles.statTextLeft}>{this.state.key} {this.state.mode}</Text>
+                <Text style={styles.statDescText}>PITCH {'&'} MOD.</Text>
               </View>
               <View style={styles.featureContainer}>
                 <Text style={styles.statTextRight}>{this.state.beats}</Text>
@@ -215,16 +299,89 @@ class Song extends React.Component<Props, any>{
             </View>
           </View>
         </View>
-        <View style={styles.songInfoContainer}>
-          <Text style={styles.songTitle}>{this.state.name}</Text>
-          <Text style={styles.songArtist}>{this.state.artists}</Text>
-          <Text style={styles.songTypeYear}>{this.state.album}</Text>
+      
+      <LinearGradient colors={[rgba('#353535', 0), rgba('#353535', 0.2), rgba('#353535', 0.4), rgba('#353535', 0.7), rgba('#353535', 0.9), '#353535']} style={{height:150}}>
+        <Text style={styles.similarTracksText}>Tracks In Similar Keys:</Text>
+        </LinearGradient>
+      </ImageBackground>
+      <LinearGradient  colors = {['#353535', '#494949','#252525']} style={{flex:1, paddingVertical: '2%'}}>
+        <View style={styles.headBar}>
+          <View style={styles.leftBar}>
+              <Text style={{ color:'white', fontSize:(isMobile? 9:18), fontWeight: '700', textShadowColor:'white', textShadowRadius:1, flex:1 }}>TRACK</Text>
+          </View>
+          <View style={styles.middleBar}>
+              <Text style={{ color:'white', fontSize:(isMobile? 9:18), fontWeight: '700', textShadowColor:'white', textShadowRadius:1, flex:1 }}>ARTIST</Text>
+              <Text style={{ color:'white', fontSize:(isMobile? 9:18), fontWeight: '700', textShadowColor:'white', textShadowRadius:1, flex:1 }}>ALBUM</Text>
+          </View>
+          <View style={styles.rightBar}>
+            <Text style={styles.barText}>DUR.</Text>
+              <Text style={{ color:'white', fontSize:(isMobile? 9:18), fontWeight: '700', textShadowColor:'white', textShadowRadius:1, flex:1 }}>KEY</Text>
+              <Text style={{ color:'white', fontSize:(isMobile? 9:18), fontWeight: '700', textShadowColor:'white', textShadowRadius:1, flex:1 }}>ENERGY</Text>
+              <Text style={{ color:'white', fontSize:(isMobile? 9:18), fontWeight: '700', textShadowColor:'white', textShadowRadius:1, flex:1 }}>BPM</Text>
+              <Text style={{ color:'white', fontSize:(isMobile? 9:18), fontWeight: '700', textShadowColor:'white', textShadowRadius:1, flex:1 }}>TIME SIG.</Text>
+          </View>
         </View>
-    </ImageBackground>
+        <FlatList
+          data={this.state.similarTracks}
+          renderItem={({item}) => 
+            <TrackInfo navigation={this.props.navigation} token={this.state.token} song={item} songs={this.state.songsInPlaylist} push={true}/>
+          }
+          keyExtractor={(song:any) => song.id}
+          scrollEnabled={false}
+        />
+      </LinearGradient>
+    </ScrollView>
   );}
 }
 
 const styles = StyleSheet.create({
+  headBar: {
+    borderWidth:1,
+    borderColor:'white',
+    width:'95%',
+    height:'auto',
+    padding:10,
+    flexDirection:'row',
+    alignSelf:'center',
+    justifyContent:'space-between',
+    shadowColor:'white',
+    shadowRadius:4,
+  },
+  leftBar: {
+    width:'26%',
+    paddingLeft: '7%',
+  },
+  middleBar: {
+    width:'35%',
+    flexDirection:'row',
+  },
+  rightBar: {
+    width:'36%',
+    flexDirection:'row',
+    justifyContent:'space-between',
+  },
+  barText: {
+    color:'white',
+    fontSize:(isMobile? 9:18),
+    fontWeight: '700',
+    textShadowColor:'white',
+    textShadowRadius:1,
+    flex:1,
+  },
+  similarTracksText:{
+    color: 'white',
+    fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
+    textShadowColor:'black',
+    textShadowRadius:3,
+    textShadowOffset: {width:2,height:1},
+    letterSpacing:1,
+    fontSize: (isMobile? 18: 25),
+    fontWeight: '700',
+    textAlign: 'left',
+    padding: 10,
+    marginLeft:'2%',
+    marginTop:'3%'
+  },
   songTitle:{
     color: 'white',
     fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'),
@@ -232,7 +389,7 @@ const styles = StyleSheet.create({
     textShadowRadius:3,
     textShadowOffset: {width:2,height:1},
     letterSpacing:1,
-    fontSize: 25,
+    fontSize: (isMobile? 18:25),
     fontWeight: '700',
     textAlign: 'left',
   },
@@ -243,7 +400,7 @@ const styles = StyleSheet.create({
     textShadowRadius:3,
     textShadowOffset: {width:2,height:1},
     letterSpacing:1,
-    fontSize: 20,
+    fontSize: (isMobile? 15:20),
     fontWeight: '500',
     textAlign: 'left',
   },
@@ -258,14 +415,12 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
   songInfoContainer:{
-    alignSelf: 'center',
-    // marginBottom: '2%',
-    paddingBottom:'1vh',
-    paddingTop:(isMobile? 220:'0%'),
-    marginTop:'1%',
+    alignSelf: (isMobile ? 'center' : 'flex-start'),
+    width:(isMobile ? '100%':'80%'),
+    height:(isMobile? 80:110),
+    marginVertical:'1%',
     justifyContent:'space-between',
-    height: '15%',
-    paddingHorizontal:(isMobile? '1%':'0%')
+    flex:1,
   },
   statTextLeft:{
     color: 'white',
@@ -338,12 +493,6 @@ const styles = StyleSheet.create({
   },
   valence:{
     zIndex: 4,
-  },
-  backgroundimage: {
-    resizeMode: 'cover',
-    minHeight: '100vh',
-    marginTop:-65,
-    overflow:(isMobile?'scroll':'hidden'),
   },
   spotifyButton:{
     backgroundColor: '#1DB954',

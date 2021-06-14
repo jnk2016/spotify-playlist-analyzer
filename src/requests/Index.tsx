@@ -95,11 +95,70 @@ axios({
   }
   })
   .then(response=>{
-      return response.data;
+    return response.data;
   })
   .catch(err =>{
     console.log(err.response);
     return true;
+  })
+;
+
+export const GetTracksFromAlbums = (albumIds:string, artistName:string, trackNames:string[], token:any) =>
+axios({
+  method: 'get',
+  url:`https://api.spotify.com/v1/albums`,
+  headers: {
+    Authorization: `Bearer ${token}`
+  },
+  params:{
+    ids:albumIds,
+    limit:20,
+  }
+  })
+  .then(response=>{
+    let tracks: any[] = [];
+    let newTrackNames: string[] = [];
+
+    tracks = tracks.concat(response.data.albums
+      .map((album:any)=>{
+        return album.tracks.items
+        .filter((track:any)=>{
+          if(newTrackNames.includes(track.name)) {
+            return false;
+          }
+          if(trackNames.includes(track.name)) {
+            return false;
+          }
+          for(var l = 0; l < track.artists.length; l++){
+            if(track.artists[l].name == artistName){
+              newTrackNames.push(track.name);
+              return true;
+            }
+          }
+          return false;
+        })
+        .map((track:any)=>{
+          return({
+            album_name: album.name,
+            duration_ms: track.duration_ms,
+            artists: track.artists,
+            artwork: album.images,
+            name: track.name,
+            id: track.id,
+            popularity: album.popularity,
+            external_urls:track.external_urls,
+          })
+        })
+      }
+    ))
+    return {
+      newTracks: tracks,
+      newTrackNames: newTrackNames,
+    };
+  })
+  .catch(err =>{
+    console.log(err.response);
+    return err;
   })
 ;
 
@@ -176,7 +235,9 @@ export const GetAllArtistTracks = async(artistId:any, token:any) => {
     let allTracks: any[] = [];
 
     let totalAlbums = allAlbums.totalAlbums;
-    let albumIds = allAlbums.ids;
+    let albumIds:any[] = allAlbums.ids;
+
+    let allTrackNames: string[] = [];
 
     /* Getting the rest of the albums */
     let iterations = Math.floor(totalAlbums/50);
@@ -187,31 +248,48 @@ export const GetAllArtistTracks = async(artistId:any, token:any) => {
       }));
     }
 
-    
-    /* Mapping each album's tracks to track array */
-    for(var k = 0; k < totalAlbums; k++){
-      // await new Promise(resolve => setTimeout(resolve,500));
-      let album = await GetAlbum(albumIds[k], token);
-      allTracks = allTracks.concat(album.tracks.items.filter((track:any)=>{
-        for(var l = 0; l < track.artists.length; l++){
-          if(track.artists[l].name == artistDetails.name){
-            return true;
-          }
-        }
-        return false;
-      }).map((track:any)=>{
-        return ({
-          album_name: album.name,
+    /* Getting the tracks in batches of albums using multiple album ids */
+    iterations = Math.floor(albumIds.length/20);
+    var albumIdsString = albumIds.slice(0,20).toString();
+    let albumBatch = await GetTracksFromAlbums(albumIdsString, artistDetails.name, allTrackNames, token);
+    allTrackNames = allTrackNames.concat(albumBatch.newTrackNames.map((name:any)=>{return name}));
+    for(var k = 0; k < albumBatch.newTracks.length; k++) {
+      if(albumBatch.newTracks[k].length != 0) {
+        allTracks = allTracks.concat(albumBatch.newTracks[k]
+        .map((track:any)=>{return ({
+          album_name: track.album_name,
           duration_ms: track.duration_ms,
           artists: track.artists,
-          artwork: album.images,
+          artwork: track.artwork,
           name: track.name,
           id: track.id,
-          popularity: album.popularity,
+          popularity: track.popularity,
           external_urls:track.external_urls,
-        });
-      }))
+        })}))
+      }
     }
+
+    for(var j = 0; j < iterations; j++) {
+      albumIdsString = albumIds.slice(20*(j+1),(j==iterations-1 ? albumIds.length : 20*(j+2))).toString();
+      albumBatch = await GetTracksFromAlbums(albumIdsString, artistDetails.name, allTrackNames, token);
+      allTrackNames = allTrackNames.concat(albumBatch.newTrackNames.map((name:any)=> {return name}));
+      for(var k = 0; k < albumBatch.newTracks.length; k++) {
+        if(albumBatch.newTracks[k].length != 0) {
+          allTracks = allTracks.concat(albumBatch.newTracks[k]
+          .map((track:any)=>{return ({
+            album_name: track.album_name,
+            duration_ms: track.duration_ms,
+            artists: track.artists,
+            artwork: track.artwork,
+            name: track.name,
+            id: track.id,
+            popularity: track.popularity,
+            external_urls:track.external_urls,
+          })}))
+        }
+      }
+    }
+
     return({
       tracks: allTracks,
       total: allTracks.length,
