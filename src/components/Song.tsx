@@ -1,7 +1,7 @@
 import React from 'react';
 import { Image, StyleSheet, TouchableOpacity, Text, View, ImageBackground, FlatList, ScrollView } from 'react-native';
 import {PieChart} from 'react-minimal-pie-chart';
-import { GetTrackAnalysis} from '../requests/Index';
+import { GetTrackAnalysis, GetToken } from '../requests/Index';
 import { isMacOs, isMobile } from "react-device-detect";
 import {Hoverable} from 'react-native-web-hover';
 import TrackInfo from '../assets/Features/TrackInfo';
@@ -107,6 +107,13 @@ class Song extends React.Component<Props, any>{
 
     }catch (err) {
       console.log(err);
+      if(err.error.status === 401 && err.error.message === 'The access token expired') {
+        let newToken = await GetToken();
+        this.setState({
+          token: newToken
+        })
+        this.renderValues();
+      }
     };
   }
 

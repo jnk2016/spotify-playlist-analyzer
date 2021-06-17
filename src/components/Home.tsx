@@ -9,6 +9,7 @@ import LinearGradient from '../assets/Features/LinearGradient';
 import CheckMark from '../assets/images/Checkmark.png';
 import { BrowserView, MobileView, isMobile, isMacOs } from "react-device-detect";
 import {Hoverable} from 'react-native-web-hover';
+import {GetTrackAnalysis} from '../requests/Index'
 
 interface Props{
   navigation:any
@@ -223,7 +224,12 @@ class Home extends React.Component<Props, any>{
           <BrowserView>
             <View style={styles.headerOptions}>
               <Hoverable>
-                {({hovered})=>(<TouchableOpacity onPress={()=>{this.setState({infoType:'data'})}}>
+                {({hovered})=>(<TouchableOpacity onPress={async()=>{this.setState({infoType:'data'});
+              try{
+                let result = await GetTrackAnalysis('2beor6qrB0XJxW1CM6X9x2','BQBO4vM46oRHjBUW6JLLk9IA_crV3qj1c4u5zJO_uOEHLbGU5dYrF44SqMAxOSAje7dxW-xF428PzP42EHI' );
+              }catch (err){
+                console.log(err);
+              }}}>
                   <Text style = {{ fontFamily:(isMacOs? 'BlinkMacSystemFont' : 'Segoe UI'), color:'white', textShadowColor:'white', textShadowRadius:14, fontSize: 20, letterSpacing:1, opacity: (hovered? .6:1)}}>audio data</Text></TouchableOpacity>)}
               </Hoverable>
               <Hoverable>

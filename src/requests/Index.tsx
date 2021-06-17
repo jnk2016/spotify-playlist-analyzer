@@ -326,8 +326,8 @@ axios({
       return response.data;
   })
   .catch(err =>{
-      console.log(err.response);
-      return err.response.status;
+      console.log(err.response.data);
+      throw err.response.data;
   })
 ;
 
@@ -344,7 +344,7 @@ export const GetTrackAnalysis = (id:any, token:any)=>
       return response.data;
   })
   .catch(err =>{
-    console.log(err.response);
-    return true;
+    console.log(err.response.data);
+    throw err.response.data;
   })
 ;

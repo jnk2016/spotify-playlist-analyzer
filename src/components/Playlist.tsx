@@ -84,6 +84,8 @@ class PlaylistItems extends React.Component<Props, any>{
       showFilterSpecs: 'initial',
       min:0,
       max:200,
+      keyNum:'',
+      keyLetter:'',
       Uri:this.props.route.params.Uri,
       // New state stuff
       trackIds:[],
@@ -411,7 +413,7 @@ class PlaylistItems extends React.Component<Props, any>{
   filterPlaylist = async (filterMethod:any, params:any) => {
     let newArray = [];
     if(filterMethod === 'key'){
-        newArray =  this.state.TrackDetails.filter((track: { keyNum: any; })=> (track.keyNum===params))
+        newArray =  this.state.TrackDetails.filter((track: { keyWheelNum: any; })=> (track.keyWheelNum===params))
     }
     else if(filterMethod === 'energy'){
         newArray =  this.state.TrackDetails.filter((track: { energy: any; })=> ((Math.round(track.energy * 10) >= params.minEnergy) && Math.round(track.energy * 10) <= params.maxEnergy))
@@ -443,60 +445,39 @@ class PlaylistItems extends React.Component<Props, any>{
       );}
     else if (this.state.showFilterSpecs === 'key'){
       return(
-        <View style={styles.filterSpecContainer}>
+        <View style={styles.filterSpecInputContainer}>
           <View style={{flexDirection: 'row', justifyContent:'space-between', width:'90%', alignSelf:'center'}}>
             <TouchableOpacity style={{alignSelf:'center'}} onPress={()=>{this.setState({showFilterSpecs:'initial'})}}>
               <Text style={styles.filterSpecText}> X </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#8F8F8F', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius: 50}} onPress={()=>(this.resetPlaylist())}>
+            <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#8F8F8F', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius: 50}} onPress={()=>{this.resetPlaylist()}}>
               <Text style={styles.filterSpecText}>RESET</Text>
             </TouchableOpacity>
           </View>
-          <View style={{flexDirection: 'row', justifyContent:'space-between', marginTop: '5%'}}>
-            <View style = {styles.threeKeyContainer}>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 0))}>
-                <Text style={styles.filterSpecText}>    C    </Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 1))}>
-                <Text style={styles.filterSpecText}>C♯ / D♭</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 2))}>
-                <Text style={styles.filterSpecText}>    D    </Text>
-              </TouchableOpacity>
-            </View>
-            <View style = {styles.threeKeyContainer}>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 3))}>
-                <Text style={styles.filterSpecText}>D♯ / E♭</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 4))}>
-                <Text style={styles.filterSpecText}>    E    </Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 5))}>
-                <Text style={styles.filterSpecText}>    F    </Text>
-              </TouchableOpacity>
-            </View>
-            <View style = {styles.threeKeyContainer}>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 6))}>
-                <Text style={styles.filterSpecText}>F♯ / G♭</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 7))}>
-                <Text style={styles.filterSpecText}>    G    </Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 8))}>
-                <Text style={styles.filterSpecText}>G♯ / A♭</Text>
-              </TouchableOpacity>
-            </View>
-            <View style = {styles.threeKeyContainer}>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 9))}>
-                <Text style={styles.filterSpecText}>    A    </Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 10))}>
-                <Text style={styles.filterSpecText}>A♯ / B♭</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.filterSpecButton} onPress={()=>(this.filterPlaylist('key', 11))}>
-                <Text style={styles.filterSpecText}>    B    </Text>
-              </TouchableOpacity>
-            </View>
+          <View style={{flexDirection: 'row', justifyContent:'space-between', marginTop:'10%'}}>
+            <Text style={styles.filterSpecMinMaxText}>number</Text>
+            <TextInput
+              style={styles.filterSpecInput}
+              onChangeText = {keyNum=>this.setState({keyNum:keyNum})}
+              placeholder={'1-12'}
+              allowFontScaling = {true}
+              placeholderTextColor='#C4C4C4'
+              />
+          </View>
+          <View style={{flexDirection: 'row', justifyContent:'space-between', marginVertical: '10%'}}>
+            <Text style={styles.filterSpecMinMaxText}>modality</Text>
+            <TextInput
+              style={styles.filterSpecInput}
+              onChangeText = {keyLetter=>this.setState({keyLetter:keyLetter})}
+              placeholder={'A or B'}
+              allowFontScaling = {true}
+              placeholderTextColor='#C4C4C4'
+              />
+          </View>
+          <View style={{flexDirection: 'row', justifyContent:'space-evenly',marginBottom:'3%', marginTop: '1%',}}>
+            <TouchableOpacity style={{alignSelf:'center', backgroundColor:'#1DB954', paddingVertical: '1%', paddingHorizontal:'10%', borderRadius:50, shadowColor:'black',shadowRadius:5, shadowOffset:{width:1,height:1}}} onPress={()=>{this.filterPlaylist('key', (this.state.keyNum + this.state.keyLetter))}}>
+              <Text style={{color:'white', alignSelf:'center', fontFamily:(isMacOs ? 'BlinkMacSystemFont' : 'Segoe UI'), letterSpacing:1, fontWeight:'600'}}>FILTER</Text>
+            </TouchableOpacity>
           </View>
         </View>
       )

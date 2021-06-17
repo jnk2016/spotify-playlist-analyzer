@@ -15,6 +15,7 @@ function App() {
   const config = {
     screens:{
       Home: 'home',
+      Playlist: 'collection'
     }
   }
   const linking = {
